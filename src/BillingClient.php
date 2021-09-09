@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Validation;
 
 class BillingClient
 {
-    const DEFAULT_USER_AGENT = 'Internal PHP Client';
+    const DEFAULT_USER_AGENT = 'Billing PHP Client';
     const DEFAULT_BACKOFF_RETRIES = 10;
 
     /** @var GuzzleClient */
