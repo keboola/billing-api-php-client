@@ -4,6 +4,7 @@
     "require": {
         "php": ">=5.6",
         "ext-json": "*",
+        "keboola/coding-standard": "^13.0",
         "keboola/storage-api-client": "^11.2|^12.1",
         "symfony/validator": "^2.3|^3.4|^4.2|^5.0"
     },
