@@ -1,0 +1,32 @@
+pr: none
+trigger:
+  batch: true
+  branches:
+    include:
+      - '*'
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  DOCKER_BUILDKIT: 1
+
+stages:
+  - stage: tests
+    displayName: Build & Test
+    jobs:
+      - job: test
+        displayName: 'Test'
+        steps:
+          - script: |
+              set -Eeuo pipefail
+
+              docker-compose build --pull
+              docker-compose run --rm tests
+            displayName: 'Build & Run Tests'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish Test results'
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'build/logs/*.xml'
