@@ -49,7 +49,7 @@ class BillingClientTest extends TestCase
     {
         self::expectException(BillingClientException::class);
         self::expectExceptionMessage(
-            'Invalid parameters when creating client: Value "-1" is invalid: This value should be 0 or more'
+            'Invalid parameters when creating client: Value "-1" is invalid: This value should be between 0 and 100.'
         );
         new BillingClient(
             'http://example.com/',
@@ -65,7 +65,7 @@ class BillingClientTest extends TestCase
     {
         self::expectException(BillingClientException::class);
         self::expectExceptionMessage(
-            'Invalid parameters when creating client: Value "101" is invalid: This value should be 100 or less'
+            'Invalid parameters when creating client: Value "101" is invalid: This value should be between 0 and 100.'
         );
         new BillingClient(
             'http://example.com/',
@@ -139,7 +139,7 @@ class BillingClientTest extends TestCase
         self::assertEquals('http://example.com/credits', $request->getUri()->__toString());
         self::assertEquals('GET', $request->getMethod());
         self::assertEquals('testToken', $request->getHeader('X-StorageApi-Token')[0]);
-        self::assertEquals('Internal PHP Client', $request->getHeader('User-Agent')[0]);
+        self::assertEquals('Billing PHP Client', $request->getHeader('User-Agent')[0]);
         self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
     }
 
