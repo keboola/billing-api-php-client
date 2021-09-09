@@ -26,17 +26,12 @@ class BillingClient
     /** @var GuzzleClient */
     protected $guzzle;
 
-    /** @var LoggerInterface */
-    private $logger;
-
     /**
-     * @param LoggerInterface $logger
      * @param string $billingUrl
      * @param string $storageToken
      * @param array $options
      */
     public function __construct(
-        LoggerInterface $logger,
         $billingUrl,
         $storageToken,
         array $options = []
@@ -67,7 +62,6 @@ class BillingClient
             throw new BillingClientException('Invalid parameters when creating client: ' . $messages);
         }
         $this->guzzle = $this->initClient($billingUrl, $storageToken, $options);
-        $this->logger = $logger;
     }
 
     /**

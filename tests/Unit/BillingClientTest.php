@@ -10,8 +10,6 @@ use GuzzleHttp\Psr7\Response;
 use Keboola\JobQueueUtils\BillingClient;
 use Keboola\JobQueueUtils\Exception\BillingClientException;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Psr\Log\Test\TestLogger;
 
 class BillingClientTest extends TestCase
@@ -19,10 +17,9 @@ class BillingClientTest extends TestCase
     /**
      * @return BillingClient
      */
-    private function getClient(array $options, LoggerInterface $logger = null)
+    private function getClient(array $options)
     {
         return new BillingClient(
-            $logger ? $logger : new NullLogger(),
             'http://example.com/',
             'testToken',
             $options
@@ -39,7 +36,6 @@ class BillingClientTest extends TestCase
             'Invalid parameters when creating client: Value "abc" is invalid: This value should be a valid number'
         );
         new BillingClient(
-            new NullLogger(),
             'http://example.com/',
             'testToken',
             ['backoffMaxTries' => 'abc']
@@ -56,7 +52,6 @@ class BillingClientTest extends TestCase
             'Invalid parameters when creating client: Value "-1" is invalid: This value should be 0 or more'
         );
         new BillingClient(
-            new NullLogger(),
             'http://example.com/',
             'testToken',
             ['backoffMaxTries' => -1]
@@ -73,7 +68,6 @@ class BillingClientTest extends TestCase
             'Invalid parameters when creating client: Value "101" is invalid: This value should be 100 or less'
         );
         new BillingClient(
-            new NullLogger(),
             'http://example.com/',
             'testToken',
             ['backoffMaxTries' => 101]
@@ -89,7 +83,7 @@ class BillingClientTest extends TestCase
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.'
         );
-        new BillingClient(new NullLogger(), 'http://example.com/', '');
+        new BillingClient('http://example.com/', '');
     }
 
     /**
@@ -101,7 +95,7 @@ class BillingClientTest extends TestCase
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
         );
-        new BillingClient(new NullLogger(), 'invalid url', 'testToken');
+        new BillingClient('invalid url', 'testToken');
     }
 
     /**
@@ -113,7 +107,7 @@ class BillingClientTest extends TestCase
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
         );
-        new BillingClient(new NullLogger(), 'invalid url', '');
+        new BillingClient('invalid url', '');
     }
 
     /**

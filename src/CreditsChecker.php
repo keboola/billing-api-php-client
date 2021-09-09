@@ -44,7 +44,7 @@ class CreditsChecker
             );
         }
 
-        return new BillingClient(new NullLogger(), $url, $token);
+        return new BillingClient($url, $token);
     }
 
     /**
