@@ -1,9 +1,9 @@
 <?php
 
-namespace Keboola\DockerBundle\Tests\Docker;
+namespace Tests\Keboola\JobQueueUtils\Unit;
 
-use Keboola\DockerBundle\Docker\BillingClient;
-use Keboola\DockerBundle\Docker\CreditsChecker;
+use Keboola\JobQueueUtils\BillingClient;
+use Keboola\JobQueueUtils\CreditsChecker;
 use Keboola\StorageApi\Client;
 use PHPUnit\Framework\TestCase;
 

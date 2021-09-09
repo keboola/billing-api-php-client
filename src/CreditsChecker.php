@@ -1,6 +1,6 @@
 <?php
 
-namespace Keboola\DockerBundle\Docker;
+namespace Keboola\JobQueueUtils;
 
 use Keboola\StorageApi\Client;
 use Psr\Log\NullLogger;

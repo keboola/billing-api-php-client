@@ -1,6 +1,6 @@
 <?php
 
-namespace Keboola\DockerBundle\Docker;
+namespace Keboola\JobQueueUtils;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;

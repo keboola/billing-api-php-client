@@ -1,13 +1,13 @@
 <?php
 
-namespace Keboola\DockerBundle\Tests\Docker;
+namespace Tests\Keboola\JobQueueUtils\Unit;
 
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Keboola\DockerBundle\Docker\BillingClient;
+use Keboola\JobQueueUtils\BillingClient;
 use Keboola\DockerBundle\Exception\BillingClientException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
