@@ -38,8 +38,8 @@ class CreditsChecker
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
-            throw new BillingClientException(sprintf(
-                'Service "%s" was not found in KBC services', 'billing'),
+            throw new BillingClientException(
+                sprintf('Service "%s" was not found in KBC services', 'billing'),
                 500
             );
         }
