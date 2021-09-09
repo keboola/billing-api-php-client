@@ -19,7 +19,7 @@ class CreditsChecker
     {
         $index = $this->client->indexAction();
         foreach ($index['services'] as $service) {
-            if ($service['id'] == 'billing') {
+            if ($service['id'] === 'billing') {
                 return $service['url'];
             }
         }

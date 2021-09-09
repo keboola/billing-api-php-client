@@ -71,6 +71,10 @@ class BillingClient
         return (double) $data['remaining'];
     }
 
+    /**
+     * @param int $maxRetries
+     * @return \Closure
+     */
     private function createDefaultDecider($maxRetries)
     {
         return function (
@@ -91,6 +95,12 @@ class BillingClient
         };
     }
 
+    /**
+     * @param string $url
+     * @param string $token
+     * @param array $options
+     * @return GuzzleClient
+     */
     private function initClient($url, $token, array $options = [])
     {
         // Initialize handlers (start with those supplied in constructor)

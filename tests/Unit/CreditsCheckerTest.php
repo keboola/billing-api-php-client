@@ -67,7 +67,7 @@ class CreditsCheckerTest extends TestCase
                     'features' => [
                         'transformation-config-storage',
                     ],
-                ]
+                ],
             ]
         );
         /** @var Client $client */
@@ -125,7 +125,7 @@ class CreditsCheckerTest extends TestCase
                         'transformation-config-storage',
                         'pay-as-you-go',
                     ],
-                ]
+                ],
             ]
         );
         $billingClient = self::getMockBuilder(BillingClient::class)
