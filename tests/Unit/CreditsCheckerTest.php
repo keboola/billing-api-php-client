@@ -9,6 +9,9 @@ use PHPUnit\Framework\TestCase;
 
 class CreditsCheckerTest extends TestCase
 {
+    /**
+     * @return void
+     */
     public function testCheckCreditsNoBilling()
     {
         $client = $this->getMockBuilder(Client::class)
@@ -34,6 +37,9 @@ class CreditsCheckerTest extends TestCase
         $this->assertTrue($creditsChecker->hasCredits());
     }
 
+    /**
+     * @return void
+     */
     public function testCheckCreditsNoFeature()
     {
         $client = $this->getMockBuilder(Client::class)
@@ -75,6 +81,9 @@ class CreditsCheckerTest extends TestCase
         self::assertTrue($creditsChecker->hasCredits());
     }
 
+    /**
+     * @return array
+     */
     public function valuesProvider()
     {
         return [
@@ -87,9 +96,10 @@ class CreditsCheckerTest extends TestCase
     }
 
     /**
-     * $@dataProvider valuesProvider
+     * @dataProvider valuesProvider
      * @param double $remainingCredits
      * @param bool $hasCredits
+     * @return void
      */
     public function testCheckCreditsHasFeatureHasCredits($remainingCredits, $hasCredits)
     {

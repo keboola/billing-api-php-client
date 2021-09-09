@@ -16,6 +16,9 @@ use Psr\Log\Test\TestLogger;
 
 class BillingClientTest extends TestCase
 {
+    /**
+     * @return BillingClient
+     */
     private function getClient(array $options, LoggerInterface $logger = null)
     {
         return new BillingClient(
@@ -26,6 +29,9 @@ class BillingClientTest extends TestCase
         );
     }
 
+    /**
+     * @return void
+     */
     public function testCreateClientInvalidBackoff()
     {
         self::expectException(BillingClientException::class);
@@ -40,6 +46,9 @@ class BillingClientTest extends TestCase
         );
     }
 
+    /**
+     * @return void
+     */
     public function testCreateClientTooLowBackoff()
     {
         self::expectException(BillingClientException::class);
@@ -54,6 +63,9 @@ class BillingClientTest extends TestCase
         );
     }
 
+    /**
+     * @return void
+     */
     public function testCreateClientTooHighBackoff()
     {
         self::expectException(BillingClientException::class);
@@ -68,6 +80,9 @@ class BillingClientTest extends TestCase
         );
     }
 
+    /**
+     * @return void
+     */
     public function testCreateClientInvalidToken()
     {
         self::expectException(BillingClientException::class);
@@ -77,6 +92,9 @@ class BillingClientTest extends TestCase
         new BillingClient(new NullLogger(), 'http://example.com/', '');
     }
 
+    /**
+     * @return void
+     */
     public function testCreateClientInvalidUrl()
     {
         self::expectException(BillingClientException::class);
@@ -86,6 +104,9 @@ class BillingClientTest extends TestCase
         new BillingClient(new NullLogger(), 'invalid url', 'testToken');
     }
 
+    /**
+     * @return void
+     */
     public function testCreateClientMultipleErrors()
     {
         self::expectException(BillingClientException::class);
@@ -95,6 +116,9 @@ class BillingClientTest extends TestCase
         new BillingClient(new NullLogger(), 'invalid url', '');
     }
 
+    /**
+     * @return void
+     */
     public function testClientRequestResponse()
     {
         $mock = new MockHandler([
@@ -125,6 +149,9 @@ class BillingClientTest extends TestCase
         self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
     }
 
+    /**
+     * @return void
+     */
     public function testInvalidResponse()
     {
         $mock = new MockHandler([
@@ -145,6 +172,9 @@ class BillingClientTest extends TestCase
         $client->getRemainingCredits();
     }
 
+    /**
+     * @return void
+     */
     public function testLogger()
     {
         $mock = new MockHandler([
@@ -172,6 +202,9 @@ class BillingClientTest extends TestCase
         self::assertTrue($logger->hasInfoThatContains('test agent'));
     }
 
+    /**
+     * @return void
+     */
     public function testRetrySuccess()
     {
         $mock = new MockHandler([
@@ -212,6 +245,9 @@ class BillingClientTest extends TestCase
         self::assertEquals('http://example.com/credits', $request->getUri()->__toString());
     }
 
+    /**
+     * @return void
+     */
     public function testRetryFailure()
     {
         $responses = [];
@@ -238,6 +274,9 @@ class BillingClientTest extends TestCase
         self::assertCount(2, $requestHistory);
     }
 
+    /**
+     * @return void
+     */
     public function testRetryFailureReducedBackoff()
     {
         $responses = [];

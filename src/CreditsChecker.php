@@ -2,6 +2,7 @@
 
 namespace Keboola\JobQueueUtils;
 
+use Keboola\JobQueueUtils\Exception\BillingClientException;
 use Keboola\StorageApi\Client;
 use Psr\Log\NullLogger;
 
@@ -15,23 +16,40 @@ class CreditsChecker
         $this->client = $client;
     }
 
+    /**
+     * @return string|null
+     */
     private function getBillingServiceUrl()
     {
         $index = $this->client->indexAction();
         foreach ($index['services'] as $service) {
             if ($service['id'] === 'billing') {
-                return $service['url'];
+                return (string) $service['url'];
             }
         }
         return null;
     }
 
-    public function getBillingClient($url, $token)
+    /**
+     * @param string $token
+     * @return BillingClient
+     */
+    public function getBillingClient($token)
     {
         $url = $this->getBillingServiceUrl();
+        if (!$url) {
+            throw new BillingClientException(sprintf(
+                'Service "%s" was not found in KBC services', 'billing'),
+                500
+            );
+        }
+
         return new BillingClient(new NullLogger(), $url, $token);
     }
 
+    /**
+     * @return bool
+     */
     public function hasCredits()
     {
         $url = $this->getBillingServiceUrl();
@@ -42,6 +60,6 @@ class CreditsChecker
         if (!in_array('pay-as-you-go', $tokenInfo['owner']['features'])) {
             return true; // not a payg project, run everything
         }
-        return $this->getBillingClient($url, $this->client->token)->getRemainingCredits() > 0;
+        return $this->getBillingClient($this->client->token)->getRemainingCredits() > 0;
     }
 }

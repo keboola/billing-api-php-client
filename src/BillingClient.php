@@ -29,6 +29,12 @@ class BillingClient
     /** @var LoggerInterface */
     private $logger;
 
+    /**
+     * @param LoggerInterface $logger
+     * @param string $billingUrl
+     * @param string $storageToken
+     * @param array $options
+     */
     public function __construct(
         LoggerInterface $logger,
         $billingUrl,
@@ -64,6 +70,9 @@ class BillingClient
         $this->logger = $logger;
     }
 
+    /**
+     * @return float
+     */
     public function getRemainingCredits()
     {
         $request = new Request('GET', 'credits', []);
@@ -134,6 +143,9 @@ class BillingClient
         return new GuzzleClient(['base_uri' => $url, 'handler' => $handlerStack]);
     }
 
+    /**
+     * @return array
+     */
     private function sendRequest(Request $request)
     {
         try {
@@ -144,7 +156,7 @@ class BillingClient
             }
             return $data ?: [];
         } catch (GuzzleException $e) {
-            throw new BillingClientException($e->getMessage(), $e);
+            throw new BillingClientException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }
