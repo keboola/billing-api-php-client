@@ -1,0 +1,53 @@
+{
+    "name": "keboola/job-queue-utils",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.6",
+        "ext-json": "*",
+        "keboola/storage-api-client": "^11.2|^12.1",
+        "symfony/validator": "^2.3|^3.4|^4.2|^5.0"
+    },
+    "require-dev": {
+        "phpcompatibility/php-compatibility": "^9.3",
+        "phpstan/phpstan": "^0.12.98",
+        "phpunit/phpunit": "^5.7",
+        "squizlabs/php_codesniffer": "^3.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Keboola\\JobQueueUtils\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Keboola\\JobQueueUtils\\": "tests"
+        }
+    },
+    "scripts": {
+        "tests-unit": "phpunit --colors=always --testsuite unit",
+        "tests": [
+            "@tests-unit",
+            "@tests-functional"
+        ],
+        "phpstan": "phpstan analyse --no-progress -c phpstan.neon",
+        "phpcs": "phpcs -n --ignore=vendor --extensions=php .",
+        "phpcbf": "phpcbf -n --ignore=vendor --extensions=php .",
+        "phplint": "parallel-lint -j 10 --exclude vendor .",
+        "phpcs-compatibility": "phpcs --config-set installed_paths vendor/phpcompatibility/php-compatibility && phpcs --ignore=*vendor/* -n . --standard=PHPCompatibility --runtime-set testVersion 5.6-7.4",
+        "build": [
+            "@phplint",
+            "@phpcs",
+            "@phpcs-compatibility",
+            "@phpstan",
+            "@tests-unit"
+        ],
+        "ci": [
+            "@composer validate --no-check-publish --no-check-all",
+            "@build"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}

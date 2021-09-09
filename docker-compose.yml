@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  tests: &tests
+    image: keboola/job-queue-utils
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./build/logs/:/code/build/logs/
+    environment:
+      public_queue_api_url:
+      test_storage_api_token:
+    command: ['composer', 'ci']
+
+  tests-local:
+    <<: *tests
+    volumes:
+      - .:/code
