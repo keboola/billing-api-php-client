@@ -1,13 +1,15 @@
 {
-    "name": "keboola/job-queue-utils",
+    "name": "keboola/billing-api-php-client",
     "license": "MIT",
     "require": {
         "php": ">=5.6",
         "ext-json": "*",
         "keboola/storage-api-client": "^11.2|^12.1",
+        "php-parallel-lint/php-parallel-lint": "^1.3",
         "symfony/validator": "^2.3|^3.4|^4.2|^5.0"
     },
     "require-dev": {
+        "keboola/coding-standard": "^13.0",
         "phpcompatibility/php-compatibility": "^9.3",
         "phpstan/phpstan": "^0.12.98",
         "phpunit/phpunit": "^5.7",
@@ -15,12 +17,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Keboola\\JobQueueUtils\\": "src/"
+            "Keboola\\BillingApi\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\Keboola\\JobQueueUtils\\": "tests"
+            "Tests\\Keboola\\BillingApi\\": "tests"
         }
     },
     "scripts": {

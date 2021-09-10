@@ -2,7 +2,7 @@ version: "3"
 
 services:
   tests: &tests
-    image: keboola/job-queue-utils
+    image: keboola/billing-api-php-client
     build:
       context: .
       dockerfile: Dockerfile
