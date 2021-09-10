@@ -12,7 +12,7 @@ use Keboola\BillingApi\Exception\BillingClientException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 
-class BillingClientTest extends TestCase
+class ClientTest extends TestCase
 {
     /**
      * @return Client
