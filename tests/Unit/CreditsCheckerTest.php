@@ -5,6 +5,7 @@ namespace Tests\Keboola\BillingApi\Unit;
 use Keboola\BillingApi\Client;
 use Keboola\BillingApi\CreditsChecker;
 use Keboola\StorageApi\Client as StorageApiClient;
+use Keboola\StorageApi\Options\IndexOptions;
 use PHPUnit\Framework\TestCase;
 
 class CreditsCheckerTest extends TestCase
@@ -18,8 +19,14 @@ class CreditsCheckerTest extends TestCase
             ->setMethods(['indexAction'])
             ->disableOriginalConstructor()
             ->getMock();
-        $storageApiclient->method('indexAction')->willReturn(
-            [
+        $storageApiclient->method('indexAction')
+            ->with($this->callback(function ($options) {
+                /** @var IndexOptions $options */
+                self::assertInstanceOf(IndexOptions::class, $options);
+                self::assertEquals(['components'], $options->getExclude());
+                return true;
+            }))
+            ->willReturn([
                 'services' => [
                     [
                         'id' => 'graph',
@@ -30,8 +37,7 @@ class CreditsCheckerTest extends TestCase
                         'url' => 'https://encryption.keboola.com',
                     ],
                 ],
-            ]
-        );
+            ]);
         /** @var StorageApiClient $storageApiclient */
         $creditsChecker = new CreditsChecker($storageApiclient);
         $this->assertTrue($creditsChecker->hasCredits());
@@ -42,11 +48,7 @@ class CreditsCheckerTest extends TestCase
      */
     public function testCheckCreditsNoFeature()
     {
-        $storageApiclient = $this->getMockBuilder(StorageApiClient::class)
-            ->setMethods(['indexAction', 'verifyToken'])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $storageApiclient->method('indexAction')->willReturn(
+        $storageApiclient = $this->getStorageApiMock(
             [
                 'services' => [
                     [
@@ -62,9 +64,7 @@ class CreditsCheckerTest extends TestCase
                         'url' => 'https://billing.keboola.com',
                     ],
                 ],
-            ]
-        );
-        $storageApiclient->method('verifyToken')->willReturn(
+            ],
             [
                 'id' => '123',
                 'owner' => [
@@ -76,6 +76,7 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
+
         /** @var StorageApiClient $storageApiclient */
         $creditsChecker = new CreditsChecker($storageApiclient);
         self::assertTrue($creditsChecker->hasCredits());
@@ -103,11 +104,7 @@ class CreditsCheckerTest extends TestCase
      */
     public function testCheckCreditsHasFeatureHasCredits($remainingCredits, $hasCredits)
     {
-        $storageApiclient = self::getMockBuilder(StorageApiClient::class)
-            ->setMethods(['indexAction', 'verifyToken'])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $storageApiclient->method('indexAction')->willReturn(
+        $storageApiclient = $this->getStorageApiMock(
             [
                 'services' => [
                     [
@@ -123,9 +120,7 @@ class CreditsCheckerTest extends TestCase
                         'url' => 'https://billing.keboola.com',
                     ],
                 ],
-            ]
-        );
-        $storageApiclient->method('verifyToken')->willReturn(
+            ],
             [
                 'id' => '123',
                 'owner' => [
@@ -138,6 +133,7 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
+
         $billingClient = self::getMockBuilder(Client::class)
             ->setMethods(['getRemainingCredits'])
             ->disableOriginalConstructor()
@@ -153,5 +149,34 @@ class CreditsCheckerTest extends TestCase
             ->willReturn($billingClient);
         /** @var CreditsChecker $creditsChecker */
         self::assertEquals($hasCredits, $creditsChecker->hasCredits());
+    }
+
+    /**
+     * @param array $indexData
+     * @param array $verifyTokenData
+     * @return \PHPUnit_Framework_MockObject_MockObject|StorageApiClient
+     */
+    private function getStorageApiMock(array $indexData, array $verifyTokenData)
+    {
+        $storageApiclient = self::getMockBuilder(StorageApiClient::class)
+            ->setMethods(['indexAction', 'verifyToken'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $storageApiclient->expects($this->once())
+            ->method('indexAction')
+            ->with($this->callback(function ($options) {
+                /** @var IndexOptions $options */
+                self::assertInstanceOf(IndexOptions::class, $options);
+                self::assertEquals(['components'], $options->getExclude());
+                return true;
+            }))
+            ->willReturn($indexData);
+
+        $storageApiclient->expects($this->once())
+            ->method('verifyToken')
+            ->willReturn($verifyTokenData);
+
+        return $storageApiclient;
     }
 }

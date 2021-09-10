@@ -4,6 +4,7 @@ namespace Keboola\BillingApi;
 
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\StorageApi\Client as StorageApiClient;
+use Keboola\StorageApi\Options\IndexOptions;
 
 class CreditsChecker
 {
@@ -20,7 +21,10 @@ class CreditsChecker
      */
     private function getBillingServiceUrl()
     {
-        $index = $this->client->indexAction();
+        $options = new IndexOptions();
+        $options->setExclude(['components']);
+
+        $index = $this->client->indexAction($options);
         foreach ($index['services'] as $service) {
             if ($service['id'] === 'billing') {
                 return (string) $service['url'];
