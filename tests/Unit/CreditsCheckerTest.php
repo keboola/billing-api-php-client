@@ -2,9 +2,9 @@
 
 namespace Tests\Keboola\BillingApi\Unit;
 
-use Keboola\BillingApi\BillingClient;
+use Keboola\BillingApi\Client;
 use Keboola\BillingApi\CreditsChecker;
-use Keboola\StorageApi\Client;
+use Keboola\StorageApi\Client as StorageApiClient;
 use PHPUnit\Framework\TestCase;
 
 class CreditsCheckerTest extends TestCase
@@ -14,11 +14,11 @@ class CreditsCheckerTest extends TestCase
      */
     public function testCheckCreditsNoBilling()
     {
-        $client = $this->getMockBuilder(Client::class)
+        $storageApiclient = $this->getMockBuilder(StorageApiClient::class)
             ->setMethods(['indexAction'])
             ->disableOriginalConstructor()
             ->getMock();
-        $client->method('indexAction')->willReturn(
+        $storageApiclient->method('indexAction')->willReturn(
             [
                 'services' => [
                     [
@@ -32,8 +32,8 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
-        /** @var Client $client */
-        $creditsChecker = new CreditsChecker($client);
+        /** @var StorageApiClient $storageApiclient */
+        $creditsChecker = new CreditsChecker($storageApiclient);
         $this->assertTrue($creditsChecker->hasCredits());
     }
 
@@ -42,11 +42,11 @@ class CreditsCheckerTest extends TestCase
      */
     public function testCheckCreditsNoFeature()
     {
-        $client = $this->getMockBuilder(Client::class)
+        $storageApiclient = $this->getMockBuilder(StorageApiClient::class)
             ->setMethods(['indexAction', 'verifyToken'])
             ->disableOriginalConstructor()
             ->getMock();
-        $client->method('indexAction')->willReturn(
+        $storageApiclient->method('indexAction')->willReturn(
             [
                 'services' => [
                     [
@@ -64,7 +64,7 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
-        $client->method('verifyToken')->willReturn(
+        $storageApiclient->method('verifyToken')->willReturn(
             [
                 'id' => '123',
                 'owner' => [
@@ -76,8 +76,8 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
-        /** @var Client $client */
-        $creditsChecker = new CreditsChecker($client);
+        /** @var StorageApiClient $storageApiclient */
+        $creditsChecker = new CreditsChecker($storageApiclient);
         self::assertTrue($creditsChecker->hasCredits());
     }
 
@@ -103,11 +103,11 @@ class CreditsCheckerTest extends TestCase
      */
     public function testCheckCreditsHasFeatureHasCredits($remainingCredits, $hasCredits)
     {
-        $client = self::getMockBuilder(Client::class)
+        $storageApiclient = self::getMockBuilder(StorageApiClient::class)
             ->setMethods(['indexAction', 'verifyToken'])
             ->disableOriginalConstructor()
             ->getMock();
-        $client->method('indexAction')->willReturn(
+        $storageApiclient->method('indexAction')->willReturn(
             [
                 'services' => [
                     [
@@ -125,7 +125,7 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
-        $client->method('verifyToken')->willReturn(
+        $storageApiclient->method('verifyToken')->willReturn(
             [
                 'id' => '123',
                 'owner' => [
@@ -138,16 +138,16 @@ class CreditsCheckerTest extends TestCase
                 ],
             ]
         );
-        $billingClient = self::getMockBuilder(BillingClient::class)
+        $billingClient = self::getMockBuilder(Client::class)
             ->setMethods(['getRemainingCredits'])
             ->disableOriginalConstructor()
             ->getMock();
         $billingClient->method('getRemainingCredits')
             ->willReturn($remainingCredits);
-        /** @var Client $client */
+        /** @var Client $storageApiclient */
         $creditsChecker = self::getMockBuilder(CreditsChecker::class)
             ->setMethods(['getBillingClient'])
-            ->setConstructorArgs([$client])
+            ->setConstructorArgs([$storageApiclient])
             ->getMock();
         $creditsChecker->method('getBillingClient')
             ->willReturn($billingClient);

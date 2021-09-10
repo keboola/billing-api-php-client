@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints\Url;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validation;
 
-class BillingClient
+class Client
 {
     const DEFAULT_USER_AGENT = 'Billing PHP Client';
     const DEFAULT_BACKOFF_RETRIES = 10;

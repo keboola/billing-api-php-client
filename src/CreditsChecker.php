@@ -3,15 +3,14 @@
 namespace Keboola\BillingApi;
 
 use Keboola\BillingApi\Exception\BillingClientException;
-use Keboola\StorageApi\Client;
-use Psr\Log\NullLogger;
+use Keboola\StorageApi\Client as StorageApiClient;
 
 class CreditsChecker
 {
-    /** @var Client */
+    /** @var StorageApiClient */
     private $client;
 
-    public function __construct(Client $client)
+    public function __construct(StorageApiClient $client)
     {
         $this->client = $client;
     }
@@ -32,7 +31,7 @@ class CreditsChecker
 
     /**
      * @param string $token
-     * @return BillingClient
+     * @return Client
      */
     public function getBillingClient($token)
     {
@@ -44,7 +43,7 @@ class CreditsChecker
             );
         }
 
-        return new BillingClient($url, $token);
+        return new Client($url, $token);
     }
 
     /**
