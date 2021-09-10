@@ -8,7 +8,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Keboola\BillingApi\Client;
-use Keboola\BillingApi\Exception\BillingClientException;
+use Keboola\BillingApi\Exception\BillingException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 
@@ -31,7 +31,7 @@ class ClientTest extends TestCase
      */
     public function testCreateClientInvalidBackoff()
     {
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "abc" is invalid: This value should be a valid number'
         );
@@ -47,7 +47,7 @@ class ClientTest extends TestCase
      */
     public function testCreateClientTooLowBackoff()
     {
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "-1" is invalid: This value should be between 0 and 100.'
         );
@@ -63,7 +63,7 @@ class ClientTest extends TestCase
      */
     public function testCreateClientTooHighBackoff()
     {
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "101" is invalid: This value should be between 0 and 100.'
         );
@@ -79,7 +79,7 @@ class ClientTest extends TestCase
      */
     public function testCreateClientInvalidToken()
     {
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.'
         );
@@ -91,7 +91,7 @@ class ClientTest extends TestCase
      */
     public function testCreateClientInvalidUrl()
     {
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
         );
@@ -103,7 +103,7 @@ class ClientTest extends TestCase
      */
     public function testCreateClientMultipleErrors()
     {
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
         );
@@ -161,7 +161,7 @@ class ClientTest extends TestCase
         $stack = HandlerStack::create($mock);
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack]);
-        self::expectException(BillingClientException::class);
+        self::expectException(BillingException::class);
         self::expectExceptionMessage('Unable to parse response body into JSON: Syntax error');
         $client->getRemainingCredits();
     }
@@ -262,7 +262,7 @@ class ClientTest extends TestCase
         try {
             $client->getRemainingCredits();
             self::fail('Must throw exception');
-        } catch (BillingClientException $e) {
+        } catch (BillingException $e) {
             self::assertContains('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(2, $requestHistory);
@@ -291,7 +291,7 @@ class ClientTest extends TestCase
         try {
             $client->getRemainingCredits();
             self::fail('Must throw exception');
-        } catch (BillingClientException $e) {
+        } catch (BillingException $e) {
             self::assertContains('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(4, $requestHistory);

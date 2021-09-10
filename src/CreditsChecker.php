@@ -2,7 +2,7 @@
 
 namespace Keboola\BillingApi;
 
-use Keboola\BillingApi\Exception\BillingClientException;
+use Keboola\BillingApi\Exception\BillingException;
 use Keboola\StorageApi\Client as StorageApiClient;
 
 class CreditsChecker
@@ -37,7 +37,7 @@ class CreditsChecker
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
-            throw new BillingClientException(
+            throw new BillingException(
                 sprintf('Service "%s" was not found in KBC services', 'billing'),
                 500
             );

@@ -8,7 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
-use Keboola\BillingApi\Exception\BillingClientException;
+use Keboola\BillingApi\Exception\BillingException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -59,7 +59,7 @@ class Client
             foreach ($errors as $error) {
                 $messages .= 'Value "' . $error->getInvalidValue() . '" is invalid: ' . $error->getMessage() . "\n";
             }
-            throw new BillingClientException('Invalid parameters when creating client: ' . $messages);
+            throw new BillingException('Invalid parameters when creating client: ' . $messages);
         }
         $this->guzzle = $this->initClient($billingUrl, $storageToken, $options);
     }
@@ -146,11 +146,11 @@ class Client
             $response = $this->guzzle->send($request);
             $data = json_decode($response->getBody()->getContents(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new BillingClientException('Unable to parse response body into JSON: ' . json_last_error_msg());
+                throw new BillingException('Unable to parse response body into JSON: ' . json_last_error_msg());
             }
             return $data ?: [];
         } catch (GuzzleException $e) {
-            throw new BillingClientException($e->getMessage(), $e->getCode(), $e);
+            throw new BillingException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

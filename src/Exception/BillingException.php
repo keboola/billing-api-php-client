@@ -4,6 +4,6 @@ namespace Keboola\BillingApi\Exception;
 
 use RuntimeException;
 
-class BillingClientException extends RuntimeException
+class BillingException extends RuntimeException
 {
 }
