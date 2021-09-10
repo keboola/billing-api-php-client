@@ -1,5 +1,5 @@
 {
-    "name": "keboola/job-queue-utils",
+    "name": "keboola/billing-api-php-client",
     "license": "MIT",
     "require": {
         "php": ">=5.6",
@@ -17,12 +17,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Keboola\\JobQueueUtils\\": "src/"
+            "Keboola\\BillingApi\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\Keboola\\JobQueueUtils\\": "tests"
+            "Tests\\Keboola\\BillingApi\\": "tests"
         }
     },
     "scripts": {

@@ -10,6 +10,7 @@ pool:
 
 variables:
   DOCKER_BUILDKIT: 1
+  imageName: 'keboola/billing-api-php-client'
 
 stages:
   - stage: tests

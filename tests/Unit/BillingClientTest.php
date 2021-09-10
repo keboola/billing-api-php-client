@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Keboola\JobQueueUtils\Unit;
+namespace Tests\Keboola\BillingApi\Unit;
 
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Keboola\JobQueueUtils\BillingClient;
-use Keboola\JobQueueUtils\Exception\BillingClientException;
+use Keboola\BillingApi\BillingClient;
+use Keboola\BillingApi\Exception\BillingClientException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 

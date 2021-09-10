@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Keboola\JobQueueUtils\Unit;
+namespace Tests\Keboola\BillingApi\Unit;
 
-use Keboola\JobQueueUtils\BillingClient;
-use Keboola\JobQueueUtils\CreditsChecker;
+use Keboola\BillingApi\BillingClient;
+use Keboola\BillingApi\CreditsChecker;
 use Keboola\StorageApi\Client;
 use PHPUnit\Framework\TestCase;
 

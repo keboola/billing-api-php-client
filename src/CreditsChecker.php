@@ -1,8 +1,8 @@
 <?php
 
-namespace Keboola\JobQueueUtils;
+namespace Keboola\BillingApi;
 
-use Keboola\JobQueueUtils\Exception\BillingClientException;
+use Keboola\BillingApi\Exception\BillingClientException;
 use Keboola\StorageApi\Client;
 use Psr\Log\NullLogger;
 

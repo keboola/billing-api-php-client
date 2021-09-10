@@ -1,6 +1,6 @@
 <?php
 
-namespace Keboola\JobQueueUtils\Exception;
+namespace Keboola\BillingApi\Exception;
 
 use RuntimeException;
 

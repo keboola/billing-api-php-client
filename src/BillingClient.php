@@ -1,6 +1,6 @@
 <?php
 
-namespace Keboola\JobQueueUtils;
+namespace Keboola\BillingApi;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
@@ -8,7 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
-use Keboola\JobQueueUtils\Exception\BillingClientException;
+use Keboola\BillingApi\Exception\BillingClientException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
