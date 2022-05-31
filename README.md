@@ -32,3 +32,7 @@ var_dump($credits);
     docker-compose run tests-local composer install
     docker-compose run tests-local
     ```
+
+## License
+
+MIT licensed, see [LICENSE](./LICENSE) file.
