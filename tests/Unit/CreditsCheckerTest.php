@@ -144,6 +144,7 @@ class CreditsCheckerTest extends TestCase
         $storageApiClient->expects(self::once())
             ->method('verifyToken')
             ->willReturn($verifyTokenData);
+        $storageApiClient->method('getTokenString')->willReturn('boo');
         return $storageApiClient;
     }
 }

@@ -54,6 +54,6 @@ class CreditsChecker
         if (!in_array('pay-as-you-go', $tokenInfo['owner']['features'])) {
             return true; // not a payg project, run everything
         }
-        return $this->getBillingClient($this->client->token)->getRemainingCredits() > 0;
+        return $this->getBillingClient($this->client->getTokenString())->getRemainingCredits() > 0;
     }
 }

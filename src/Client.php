@@ -27,7 +27,7 @@ class Client
     private const DEFAULT_USER_AGENT = 'Billing PHP Client';
     private const DEFAULT_BACKOFF_RETRIES = 10;
     private const CONNECT_TIMEOUT = 10;
-    private const CONNECT_RETRIES = 5;
+    private const CONNECT_RETRIES = 0;
     private const TRANSFER_TIMEOUT = 120;
 
     protected GuzzleClient $guzzle;
