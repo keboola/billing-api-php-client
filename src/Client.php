@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\BillingApi;
 
+use Closure;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
@@ -19,23 +20,21 @@ use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\Url;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validation;
+use Throwable;
 
 class Client
 {
     private const DEFAULT_USER_AGENT = 'Billing PHP Client';
     private const DEFAULT_BACKOFF_RETRIES = 10;
+    const CONNECT_TIMEOUT = 10;
+    const CONNECT_RETRIES = 5;
+    const TRANSFER_TIMEOUT = 120;
 
-    /** @var GuzzleClient */
-    protected $guzzle;
+    protected GuzzleClient $guzzle;
 
-    /**
-     * @param string $billingUrl
-     * @param string $storageToken
-     * @param array $options
-     */
     public function __construct(
-        $billingUrl,
-        $storageToken,
+        string $billingUrl,
+        string $storageToken,
         array $options = []
     ) {
         $validator = Validation::createValidator();
@@ -66,27 +65,20 @@ class Client
         $this->guzzle = $this->initClient($billingUrl, $storageToken, $options);
     }
 
-    /**
-     * @return float
-     */
-    public function getRemainingCredits()
+    public function getRemainingCredits(): float
     {
         $request = new Request('GET', 'credits', []);
         $data = $this->sendRequest($request);
         return (double) $data['remaining'];
     }
 
-    /**
-     * @param int $maxRetries
-     * @return \Closure
-     */
-    private function createDefaultDecider($maxRetries)
+    private function createDefaultDecider(int $maxRetries): Closure
     {
         return function (
-            $retries,
+            int $retries,
             RequestInterface $request,
             ?ResponseInterface $response = null,
-            $error = null
+            ?Throwable $error = null
         ) use ($maxRetries) {
             if ($retries >= $maxRetries) {
                 return false;
@@ -100,13 +92,7 @@ class Client
         };
     }
 
-    /**
-     * @param string $url
-     * @param string $token
-     * @param array $options
-     * @return GuzzleClient
-     */
-    private function initClient($url, $token, array $options = [])
+    private function initClient(string $url, string $token, array $options = []): GuzzleClient
     {
         // Initialize handlers (start with those supplied in constructor)
         if (isset($options['handler']) && is_callable($options['handler'])) {
@@ -136,13 +122,18 @@ class Client
             ));
         }
         // finally create the instance
-        return new GuzzleClient(['base_uri' => $url, 'handler' => $handlerStack]);
+        return new GuzzleClient(
+            [
+                'base_uri' => $url,
+                'handler' => $handlerStack,
+                'retries' => self::CONNECT_RETRIES,
+                'connect_timeout' => self::CONNECT_TIMEOUT,
+                'timeout' => self::TRANSFER_TIMEOUT,
+            ]
+        );
     }
 
-    /**
-     * @return array
-     */
-    private function sendRequest(Request $request)
+    private function sendRequest(Request $request): array
     {
         try {
             $response = $this->guzzle->send($request);

@@ -10,18 +10,14 @@ use Keboola\StorageApi\Options\IndexOptions;
 
 class CreditsChecker
 {
-    /** @var StorageApiClient */
-    private $client;
+    private StorageApiClient $client;
 
     public function __construct(StorageApiClient $client)
     {
         $this->client = $client;
     }
 
-    /**
-     * @return string|null
-     */
-    private function getBillingServiceUrl()
+    private function getBillingServiceUrl(): ?string
     {
         $options = new IndexOptions();
         $options->setExclude(['components']);
@@ -35,11 +31,7 @@ class CreditsChecker
         return null;
     }
 
-    /**
-     * @param string $token
-     * @return Client
-     */
-    public function getBillingClient($token)
+    public function getBillingClient(string $token): Client
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
@@ -52,10 +44,7 @@ class CreditsChecker
         return new Client($url, $token);
     }
 
-    /**
-     * @return bool
-     */
-    public function hasCredits()
+    public function hasCredits(): bool
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
