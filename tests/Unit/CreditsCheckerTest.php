@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Keboola\BillingApi\Unit;
 
 use Keboola\BillingApi\Client;
@@ -154,9 +156,9 @@ class CreditsCheckerTest extends TestCase
     /**
      * @param array $indexData
      * @param array $verifyTokenData
-     * @return \PHPUnit_Framework_MockObject_MockObject|StorageApiClient
+     * @return StorageApiClient
      */
-    private function getStorageApiMock(array $indexData, array $verifyTokenData)
+    private function getStorageApiMock(array $indexData, array $verifyTokenData): StorageApiClient
     {
         $storageApiclient = self::getMockBuilder(StorageApiClient::class)
             ->setMethods(['indexAction', 'verifyToken'])
@@ -177,6 +179,7 @@ class CreditsCheckerTest extends TestCase
             ->method('verifyToken')
             ->willReturn($verifyTokenData);
 
+        /** @var StorageApiClient $storageApiclient */
         return $storageApiclient;
     }
 }

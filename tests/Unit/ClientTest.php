@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Keboola\BillingApi\Unit;
 
 use GuzzleHttp\Handler\MockHandler;
@@ -132,7 +134,7 @@ class ClientTest extends TestCase
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack]);
         $credits = $client->getRemainingCredits();
-        self::assertEquals(123.43434343434, $credits);
+        self::assertEqualsWithDelta(123.43434343434, $credits, 0.00001);
         self::assertCount(1, $requestHistory);
         /** @var Request $request */
         $request = $requestHistory[0]['request'];
@@ -263,7 +265,7 @@ class ClientTest extends TestCase
             $client->getRemainingCredits();
             self::fail('Must throw exception');
         } catch (BillingException $e) {
-            self::assertContains('500 Internal Server Error', $e->getMessage());
+            self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(2, $requestHistory);
     }
@@ -292,7 +294,7 @@ class ClientTest extends TestCase
             $client->getRemainingCredits();
             self::fail('Must throw exception');
         } catch (BillingException $e) {
-            self::assertContains('500 Internal Server Error', $e->getMessage());
+            self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(4, $requestHistory);
     }

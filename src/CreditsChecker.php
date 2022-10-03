@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\BillingApi;
 
 use Keboola\BillingApi\Exception\BillingException;

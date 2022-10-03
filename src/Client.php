@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\BillingApi;
 
 use GuzzleHttp\Client as GuzzleClient;
@@ -20,8 +22,8 @@ use Symfony\Component\Validator\Validation;
 
 class Client
 {
-    const DEFAULT_USER_AGENT = 'Billing PHP Client';
-    const DEFAULT_BACKOFF_RETRIES = 10;
+    private const DEFAULT_USER_AGENT = 'Billing PHP Client';
+    private const DEFAULT_BACKOFF_RETRIES = 10;
 
     /** @var GuzzleClient */
     protected $guzzle;
@@ -83,7 +85,7 @@ class Client
         return function (
             $retries,
             RequestInterface $request,
-            ResponseInterface $response = null,
+            ?ResponseInterface $response = null,
             $error = null
         ) use ($maxRetries) {
             if ($retries >= $maxRetries) {
@@ -144,7 +146,7 @@ class Client
     {
         try {
             $response = $this->guzzle->send($request);
-            $data = json_decode($response->getBody()->getContents(), true);
+            $data = (array) json_decode($response->getBody()->getContents(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new BillingException('Unable to parse response body into JSON: ' . json_last_error_msg());
             }
