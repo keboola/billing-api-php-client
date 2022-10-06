@@ -7,4 +7,3 @@ parameters:
     ignoreErrors:
 includes:
     - vendor/phpstan/phpstan-phpunit/extension.neon
-    - vendor/phpstan/phpstan-symfony/extension.neon
