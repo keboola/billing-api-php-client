@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Keboola\BillingApi\Unit;
 
 use GuzzleHttp\Handler\MockHandler;
@@ -14,106 +16,82 @@ use Psr\Log\Test\TestLogger;
 
 class ClientTest extends TestCase
 {
-    /**
-     * @return Client
-     */
-    private function getClient(array $options)
+    private function getClient(array $options): Client
     {
         return new Client(
-            'http://example.com/',
+            'https://example.com/',
             'testToken',
             $options
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateClientInvalidBackoff()
+    public function testCreateClientInvalidBackoff(): void
     {
-        self::expectException(BillingException::class);
-        self::expectExceptionMessage(
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "abc" is invalid: This value should be a valid number'
         );
         new Client(
-            'http://example.com/',
+            'https://example.com/',
             'testToken',
             ['backoffMaxTries' => 'abc']
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateClientTooLowBackoff()
+    public function testCreateClientTooLowBackoff(): void
     {
-        self::expectException(BillingException::class);
-        self::expectExceptionMessage(
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "-1" is invalid: This value should be between 0 and 100.'
         );
         new Client(
-            'http://example.com/',
+            'https://example.com/',
             'testToken',
             ['backoffMaxTries' => -1]
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateClientTooHighBackoff()
+    public function testCreateClientTooHighBackoff(): void
     {
-        self::expectException(BillingException::class);
-        self::expectExceptionMessage(
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "101" is invalid: This value should be between 0 and 100.'
         );
         new Client(
-            'http://example.com/',
+            'https://example.com/',
             'testToken',
             ['backoffMaxTries' => 101]
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateClientInvalidToken()
+    public function testCreateClientInvalidToken(): void
     {
-        self::expectException(BillingException::class);
-        self::expectExceptionMessage(
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.'
         );
-        new Client('http://example.com/', '');
+        new Client('https://example.com/', '');
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateClientInvalidUrl()
+    public function testCreateClientInvalidUrl(): void
     {
-        self::expectException(BillingException::class);
-        self::expectExceptionMessage(
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
         );
         new Client('invalid url', 'testToken');
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateClientMultipleErrors()
+    public function testCreateClientMultipleErrors(): void
     {
-        self::expectException(BillingException::class);
-        self::expectExceptionMessage(
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
         );
         new Client('invalid url', '');
     }
 
-    /**
-     * @return void
-     */
-    public function testClientRequestResponse()
+    public function testClientRequestResponse(): void
     {
         $mock = new MockHandler([
             new Response(
@@ -132,21 +110,19 @@ class ClientTest extends TestCase
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack]);
         $credits = $client->getRemainingCredits();
-        self::assertEquals(123.43434343434, $credits);
+        self::assertEqualsWithDelta(123.43434343434, $credits, 0.00001);
         self::assertCount(1, $requestHistory);
-        /** @var Request $request */
+
         $request = $requestHistory[0]['request'];
-        self::assertEquals('http://example.com/credits', $request->getUri()->__toString());
+        self::assertInstanceOf(Request::class, $request);
+        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
         self::assertEquals('GET', $request->getMethod());
         self::assertEquals('testToken', $request->getHeader('X-StorageApi-Token')[0]);
         self::assertEquals('Billing PHP Client', $request->getHeader('User-Agent')[0]);
         self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
     }
 
-    /**
-     * @return void
-     */
-    public function testInvalidResponse()
+    public function testInvalidResponse(): void
     {
         $mock = new MockHandler([
             new Response(
@@ -166,10 +142,7 @@ class ClientTest extends TestCase
         $client->getRemainingCredits();
     }
 
-    /**
-     * @return void
-     */
-    public function testLogger()
+    public function testLogger(): void
     {
         $mock = new MockHandler([
             new Response(
@@ -189,17 +162,15 @@ class ClientTest extends TestCase
         $logger = new TestLogger();
         $client = $this->getClient(['handler' => $stack, 'logger' => $logger, 'userAgent' => 'test agent']);
         $client->getRemainingCredits();
-        /** @var Request $request */
+
         $request = $requestHistory[0]['request'];
+        self::assertInstanceOf(Request::class, $request);
         self::assertEquals('test agent', $request->getHeader('User-Agent')[0]);
         self::assertTrue($logger->hasInfoThatContains('"GET  /1.1" 200 '));
         self::assertTrue($logger->hasInfoThatContains('test agent'));
     }
 
-    /**
-     * @return void
-     */
-    public function testRetrySuccess()
+    public function testRetrySuccess(): void
     {
         $mock = new MockHandler([
             new Response(
@@ -228,21 +199,19 @@ class ClientTest extends TestCase
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack]);
         $credits = $client->getRemainingCredits();
+
         self::assertEquals('123', $credits);
         self::assertCount(3, $requestHistory);
-        /** @var Request $request */
         $request = $requestHistory[0]['request'];
-        self::assertEquals('http://example.com/credits', $request->getUri()->__toString());
+        self::assertInstanceOf(Request::class, $request);
+        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
         $request = $requestHistory[1]['request'];
-        self::assertEquals('http://example.com/credits', $request->getUri()->__toString());
+        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
         $request = $requestHistory[2]['request'];
-        self::assertEquals('http://example.com/credits', $request->getUri()->__toString());
+        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
     }
 
-    /**
-     * @return void
-     */
-    public function testRetryFailure()
+    public function testRetryFailure(): void
     {
         $responses = [];
         for ($i = 0; $i < 30; $i++) {
@@ -263,15 +232,12 @@ class ClientTest extends TestCase
             $client->getRemainingCredits();
             self::fail('Must throw exception');
         } catch (BillingException $e) {
-            self::assertContains('500 Internal Server Error', $e->getMessage());
+            self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(2, $requestHistory);
     }
 
-    /**
-     * @return void
-     */
-    public function testRetryFailureReducedBackoff()
+    public function testRetryFailureReducedBackoff(): void
     {
         $responses = [];
         for ($i = 0; $i < 30; $i++) {
@@ -292,7 +258,7 @@ class ClientTest extends TestCase
             $client->getRemainingCredits();
             self::fail('Must throw exception');
         } catch (BillingException $e) {
-            self::assertContains('500 Internal Server Error', $e->getMessage());
+            self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(4, $requestHistory);
     }

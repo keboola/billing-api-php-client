@@ -5,3 +5,5 @@ parameters:
         - src
         - tests
     ignoreErrors:
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon

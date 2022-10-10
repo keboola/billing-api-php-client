@@ -4,3 +4,5 @@ config.php
 composer.lock
 vendor
 set-env.sh
+/.phpunit.result.cache
+/build/logs
