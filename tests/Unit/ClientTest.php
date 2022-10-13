@@ -12,6 +12,7 @@ use GuzzleHttp\Psr7\Response;
 use Keboola\BillingApi\Client;
 use Keboola\BillingApi\Exception\BillingException;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 use Psr\Log\Test\TestLogger;
 
 class ClientTest extends TestCase
@@ -261,5 +262,46 @@ class ClientTest extends TestCase
             self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
         self::assertCount(4, $requestHistory);
+    }
+
+    public function testRecordJobDuration(): void
+    {
+        $requestsMade = [];
+        $responses = [
+            new Response(200, [], (string) json_encode([
+                'projectId' => 'project-id',
+                'jobId' => 'job-id',
+                'durationSeconds' => 72.7,
+            ])),
+        ];
+
+        $handlerStack = HandlerStack::create(new MockHandler($responses));
+        $handlerStack->push(Middleware::history($requestsMade));
+        $client = new Client('http://example.com', 'dummy-token', [
+            'handler' => $handlerStack,
+        ]);
+
+        $result = $client->recordJobDuration('project-id', 'job-id', 72.7);
+
+        self::assertCount(1, $requestsMade);
+        $request = $requestsMade[0]['request'];
+
+        self::assertInstanceOf(RequestInterface::class, $request);
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('http://example.com/duration/job', (string) $request->getUri());
+        self::assertSame(
+            json_encode([
+                'projectId' => 'project-id',
+                'jobId' => 'job-id',
+                'durationSeconds' => 72.7,
+            ]),
+            (string) $request->getBody()
+        );
+
+        self::assertSame([
+            'projectId' => 'project-id',
+            'jobId' => 'job-id',
+            'durationSeconds' => 72.7,
+        ], $result);
     }
 }

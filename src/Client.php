@@ -72,6 +72,16 @@ class Client
         return (double) $data['remaining'];
     }
 
+    public function recordJobDuration(string $projectId, string $jobId, float $durationSeconds): array
+    {
+        $request = new Request('PUT', 'duration/job', [], json_encode([
+            'projectId' => $projectId,
+            'jobId' => $jobId,
+            'durationSeconds' => $durationSeconds,
+        ], JSON_THROW_ON_ERROR));
+        return $this->sendRequest($request);
+    }
+
     private function createDefaultDecider(int $maxRetries): Closure
     {
         return function (
