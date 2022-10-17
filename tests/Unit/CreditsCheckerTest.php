@@ -6,6 +6,7 @@ namespace Tests\Keboola\BillingApi\Unit;
 
 use Generator;
 use Keboola\BillingApi\Client;
+use Keboola\BillingApi\ClientFactory;
 use Keboola\BillingApi\CreditsChecker;
 use Keboola\StorageApi\Client as StorageApiClient;
 use Keboola\StorageApi\Options\IndexOptions;
@@ -34,7 +35,7 @@ class CreditsCheckerTest extends TestCase
                     ],
                 ],
             ]);
-        $creditsChecker = new CreditsChecker($storageApiClient);
+        $creditsChecker = new CreditsChecker(new ClientFactory(), $storageApiClient);
         $this->assertTrue($creditsChecker->hasCredits());
     }
 
@@ -69,7 +70,7 @@ class CreditsCheckerTest extends TestCase
             ]
         );
 
-        $creditsChecker = new CreditsChecker($storageApiClient);
+        $creditsChecker = new CreditsChecker(new ClientFactory(), $storageApiClient);
         self::assertTrue($creditsChecker->hasCredits());
     }
 
@@ -121,7 +122,7 @@ class CreditsCheckerTest extends TestCase
         $billingClient->method('getRemainingCredits')->willReturn($remainingCredits);
         $creditsChecker = self::getMockBuilder(CreditsChecker::class)
             ->setMethods(['getBillingClient'])
-            ->setConstructorArgs([$storageApiClient])
+            ->setConstructorArgs([new ClientFactory(), $storageApiClient])
             ->getMock();
         $creditsChecker->method('getBillingClient')
             ->willReturn($billingClient);

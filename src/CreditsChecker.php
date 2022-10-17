@@ -10,10 +10,12 @@ use Keboola\StorageApi\Options\IndexOptions;
 
 class CreditsChecker
 {
+    private ClientFactory $clientFactory;
     private StorageApiClient $client;
 
-    public function __construct(StorageApiClient $client)
+    public function __construct(ClientFactory $clientFactory, StorageApiClient $client)
     {
+        $this->clientFactory = $clientFactory;
         $this->client = $client;
     }
 
@@ -41,7 +43,7 @@ class CreditsChecker
             );
         }
 
-        return new Client($url, $token);
+        return $this->clientFactory->createClient($url, $token);
     }
 
     public function hasCredits(): bool
