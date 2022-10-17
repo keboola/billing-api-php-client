@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Request;
 use Keboola\BillingApi\Exception\BillingException;
 use Psr\Http\Message\RequestInterface;
@@ -22,6 +23,14 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validation;
 use Throwable;
 
+/**
+ * @phpstan-type Options array{
+ *     handler?: HandlerStack,
+ *     backoffMaxTries: positive-int,
+ *     userAgent: string,
+ *     logger?: LoggerInterface
+ * }
+ */
 class InternalClient
 {
     private const DEFAULT_USER_AGENT = 'Billing PHP Client';
@@ -32,6 +41,14 @@ class InternalClient
 
     private GuzzleClient $guzzle;
 
+    /**
+     * @param array{
+     *     handler?: (callable(RequestInterface, array): PromiseInterface),
+     *     backoffMaxTries?: int<0, 100>,
+     *     userAgent?: string,
+     *     logger?: LoggerInterface
+     * } $options
+     */
     public function __construct(
         string $billingUrl,
         string $authHeaderName,
@@ -83,20 +100,28 @@ class InternalClient
         }
     }
 
+    /**
+     * @param array{
+     *     handler?: (callable(RequestInterface, array): PromiseInterface),
+     *     backoffMaxTries: int<0, 100>,
+     *     userAgent: string,
+     *     logger?: LoggerInterface
+     * } $options
+     */
     private function initClient(
         string $url,
         string $authHeaderName,
         string $authToken,
-        array $options = []
+        array $options
     ): GuzzleClient {
         // Initialize handlers (start with those supplied in constructor)
-        if (isset($options['handler']) && is_callable($options['handler'])) {
-            $handlerStack = HandlerStack::create($options['handler']);
-        } else {
-            $handlerStack = HandlerStack::create();
-        }
+        // having HandlerStack inside HandlerStack seem weird, but it is needed so that middlewares already registered
+        // on the passed handler are executed before middlewares registered here
+        $handlerStack = HandlerStack::create($options['handler'] ?? null);
+
         // Set exponential backoff
         $handlerStack->push(Middleware::retry($this->createDefaultDecider($options['backoffMaxTries'])));
+
         // Set handler to set default headers
         $handlerStack->push(Middleware::mapRequest(
             function (RequestInterface $request) use ($authHeaderName, $authToken, $options) {
@@ -106,6 +131,7 @@ class InternalClient
                     ->withHeader('Content-type', 'application/json');
             }
         ));
+
         // Set client logger
         if (isset($options['logger']) && $options['logger'] instanceof LoggerInterface) {
             $handlerStack->push(Middleware::log(
@@ -116,6 +142,7 @@ class InternalClient
                 )
             ));
         }
+
         // finally create the instance
         return new GuzzleClient(
             [
@@ -140,7 +167,7 @@ class InternalClient
                 return false;
             } elseif ($response && $response->getStatusCode() >= 500) {
                 return true;
-            } elseif ($error) {
+            } elseif ($error && $error->getCode() >= 500) {
                 return true;
             } else {
                 return false;

@@ -38,6 +38,7 @@ class InternalClientTest extends TestCase
             'https://example.com/',
             'authHeader',
             'authToken',
+            // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => 'abc']
         );
     }
@@ -52,6 +53,7 @@ class InternalClientTest extends TestCase
             'https://example.com/',
             'authHeader',
             'authToken',
+            // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => -1]
         );
     }
@@ -66,6 +68,7 @@ class InternalClientTest extends TestCase
             'https://example.com/',
             'authHeader',
             'authToken',
+            // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => 101]
         );
     }

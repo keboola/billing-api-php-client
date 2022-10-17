@@ -1,0 +1,27 @@
+<?php
+
+namespace GuzzleHttp
+{
+
+    use GuzzleHttp\Promise\PromiseInterface;
+    use Psr\Http\Message\RequestInterface;
+
+    class HandlerStack
+    {
+        /**
+         * @return PromiseInterface
+         * @param array<mixed> $options
+         */
+        public function __invoke(RequestInterface $request, array $options) {}
+    }
+}
+
+namespace GuzzleHttp\Promise
+{
+    interface PromiseInterface {}
+}
+
+namespace Psr\Http\Message
+{
+    interface RequestInterface {}
+}
