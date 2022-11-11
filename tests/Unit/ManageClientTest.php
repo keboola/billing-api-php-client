@@ -22,6 +22,11 @@ class ManageClientTest extends TestCase
             new Response(200, [], (string) json_encode([
                 'projectId' => 'project-id',
                 'jobId' => 'job-id',
+                'componentId' => 'keboola.component',
+                'jobType' => 'standard',
+                'backend' => [
+                    'type' => 'small',
+                ],
                 'durationSeconds' => 72.7,
             ])),
         ];
@@ -34,7 +39,14 @@ class ManageClientTest extends TestCase
 
         $client = new ManageClient($internalClient);
 
-        $result = $client->recordJobDuration('project-id', 'job-id', 72.7);
+        $result = $client->recordJobDuration(
+            'project-id',
+            'job-id',
+            'keboola.component',
+            'standard',
+            ['type' => 'small'],
+            72.7
+        );
 
         self::assertCount(1, $requestsMade);
         $request = $requestsMade[0]['request'];
@@ -47,6 +59,11 @@ class ManageClientTest extends TestCase
             json_encode([
                 'projectId' => 'project-id',
                 'jobId' => 'job-id',
+                'componentId' => 'keboola.component',
+                'jobType' => 'standard',
+                'backend' => [
+                    'type' => 'small',
+                ],
                 'durationSeconds' => 72.7,
             ]),
             (string) $request->getBody()
@@ -55,6 +72,11 @@ class ManageClientTest extends TestCase
         self::assertSame([
             'projectId' => 'project-id',
             'jobId' => 'job-id',
+            'componentId' => 'keboola.component',
+            'jobType' => 'standard',
+            'backend' => [
+                'type' => 'small',
+            ],
             'durationSeconds' => 72.7,
         ], $result);
     }
