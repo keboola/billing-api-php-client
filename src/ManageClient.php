@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Keboola\BillingApi;
 
 use GuzzleHttp\Psr7\Request;
+use Keboola\BillingApi\Model\ResolveTokenParameters;
+use Keboola\BillingApi\Model\ResolveTokenResult;
 
 class ManageClient
 {
@@ -32,5 +34,16 @@ class ManageClient
             'durationSeconds' => $durationSeconds,
         ], JSON_THROW_ON_ERROR));
         return $this->internalClient->sendRequest($request);
+    }
+
+    public function resolveMarketplaceToken(ResolveTokenParameters $parameters): ResolveTokenResult
+    {
+        $request = new Request('POST', 'marketplaces/resolve-token', [], json_encode([
+            'vendor' => $parameters->getVendor(),
+            'token' => $parameters->getToken(),
+        ], JSON_THROW_ON_ERROR));
+
+        $response = $this->internalClient->sendRequest($request);
+        return ResolveTokenResult::fromResponse($response);
     }
 }
