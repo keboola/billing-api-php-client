@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\BillingApi;
 
 use GuzzleHttp\Psr7\Request;
+use Keboola\BillingApi\Model\ConfirmSubscriptionParameters;
 use Keboola\BillingApi\Model\ResolveTokenParameters;
 use Keboola\BillingApi\Model\ResolveTokenResult;
 
@@ -45,5 +46,15 @@ class ManageClient
 
         $response = $this->internalClient->sendRequest($request);
         return ResolveTokenResult::fromResponse($response);
+    }
+
+    public function confirmMarketplaceSubscription(ConfirmSubscriptionParameters $parameters): void
+    {
+        $request = new Request('POST', 'marketplaces/confirm-subscription', [], json_encode([
+            'subscriptionId' => $parameters->getSubscriptionId(),
+            'projectId' => $parameters->getProjectId(),
+        ], JSON_THROW_ON_ERROR));
+
+        $this->internalClient->sendRequest($request, false);
     }
 }
