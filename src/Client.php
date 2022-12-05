@@ -18,7 +18,7 @@ class Client
     public function getRemainingCredits(): float
     {
         $request = new Request('GET', 'credits', []);
-        $data = $this->internalClient->sendRequest($request);
+        $data = $this->internalClient->sendRequestWithResponse($request);
         return (double) $data['remaining'];
     }
 }

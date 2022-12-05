@@ -34,7 +34,7 @@ class ManageClient
             'backend' => $backend,
             'durationSeconds' => $durationSeconds,
         ], JSON_THROW_ON_ERROR));
-        return $this->internalClient->sendRequest($request);
+        return $this->internalClient->sendRequestWithResponse($request);
     }
 
     public function resolveMarketplaceToken(ResolveTokenParameters $parameters): ResolveTokenResult
@@ -44,7 +44,7 @@ class ManageClient
             'token' => $parameters->getToken(),
         ], JSON_THROW_ON_ERROR));
 
-        $response = $this->internalClient->sendRequest($request);
+        $response = $this->internalClient->sendRequestWithResponse($request);
         return ResolveTokenResult::fromResponse($response);
     }
 
@@ -55,6 +55,6 @@ class ManageClient
             'projectId' => $parameters->getProjectId(),
         ], JSON_THROW_ON_ERROR));
 
-        $this->internalClient->sendRequest($request, false);
+        $this->internalClient->sendRequestWithoutResponse($request);
     }
 }

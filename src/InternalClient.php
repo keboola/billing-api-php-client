@@ -86,19 +86,25 @@ class InternalClient
         $this->guzzle = $this->initClient($billingUrl, $authHeaderName, $authToken, $options);
     }
 
-    public function sendRequest(Request $request, bool $responseHasBody = true): array
+    public function sendRequestWithResponse(Request $request): array
     {
         try {
             $response = $this->guzzle->send($request);
-            if (!$responseHasBody) {
-                return [];
-            }
 
             $data = (array) json_decode($response->getBody()->getContents(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new BillingException('Unable to parse response body into JSON: ' . json_last_error_msg());
             }
             return $data ?: [];
+        } catch (GuzzleException $e) {
+            throw new BillingException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    public function sendRequestWithoutResponse(Request $request): void
+    {
+        try {
+            $this->guzzle->send($request);
         } catch (GuzzleException $e) {
             throw new BillingException($e->getMessage(), $e->getCode(), $e);
         }
