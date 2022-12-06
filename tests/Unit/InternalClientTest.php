@@ -128,7 +128,7 @@ class InternalClientTest extends TestCase
         $stack->push($history);
 
         $client = $this->getClient(['handler' => $stack]);
-        $response = $client->sendRequest(new Request('GET', 'credits'));
+        $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
         self::assertSame([
             'remaining' => '123.4343434343434343',
@@ -165,7 +165,7 @@ class InternalClientTest extends TestCase
 
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage('Unable to parse response body into JSON: Syntax error');
-        $client->sendRequest(new Request('GET', 'credits'));
+        $client->sendRequestWithResponse(new Request('GET', 'credits'));
     }
 
     public function testLogger(): void
@@ -187,7 +187,7 @@ class InternalClientTest extends TestCase
         $stack->push($history);
         $logger = new TestLogger();
         $client = $this->getClient(['handler' => $stack, 'logger' => $logger, 'userAgent' => 'test agent']);
-        $client->sendRequest(new Request('GET', 'credits'));
+        $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
         $request = $requestHistory[0]['request'];
         self::assertInstanceOf(Request::class, $request);
@@ -224,7 +224,7 @@ class InternalClientTest extends TestCase
         $stack = HandlerStack::create($mock);
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack]);
-        $response = $client->sendRequest(new Request('GET', 'credits'));
+        $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
         self::assertSame([
             'remaining' => '123',
@@ -259,7 +259,7 @@ class InternalClientTest extends TestCase
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack, 'backoffMaxTries' => 1]);
         try {
-            $client->sendRequest(new Request('GET', 'credits'));
+            $client->sendRequestWithResponse(new Request('GET', 'credits'));
             self::fail('Must throw exception');
         } catch (BillingException $e) {
             self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
@@ -285,7 +285,7 @@ class InternalClientTest extends TestCase
         $stack->push($history);
         $client = $this->getClient(['handler' => $stack, 'backoffMaxTries' => 3]);
         try {
-            $client->sendRequest(new Request('GET', 'credits'));
+            $client->sendRequestWithResponse(new Request('GET', 'credits'));
             self::fail('Must throw exception');
         } catch (BillingException $e) {
             self::assertStringContainsString('500 Internal Server Error', $e->getMessage());

@@ -13,7 +13,7 @@ services:
       test_storage_api_token:
     command: ['composer', 'ci']
 
-  tests-local:
+  dev:
     <<: *tests
     volumes:
       - .:/code
