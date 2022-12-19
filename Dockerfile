@@ -14,6 +14,7 @@ COPY docker/php.ini /usr/local/etc/php/php.ini
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
 
+# lock to Xdebug 3.1.6 until we get rid of PHP 7.4
 RUN pecl install xdebug-3.1.6 \
     && docker-php-ext-enable xdebug
 
