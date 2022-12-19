@@ -6,7 +6,7 @@
         "php": ">=7.4",
         "ext-json": "*",
         "keboola/storage-api-client": "^13.0|^14.0",
-        "symfony/validator": "^4.0|^5.0|^6.0"
+        "symfony/validator": "^4.4|^5.0|^6.0"
     },
     "require-dev": {
         "keboola/coding-standard": ">=14.0",
