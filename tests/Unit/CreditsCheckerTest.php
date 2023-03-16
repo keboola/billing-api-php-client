@@ -112,17 +112,15 @@ class CreditsCheckerTest extends TestCase
     {
         if (!$verifyTokenData) {
             $verifyTokenData = [
-                [
+                'id' => '123',
+                'owner' => [
                     'id' => '123',
-                    'owner' => [
-                        'id' => '123',
-                        'name' => 'test',
-                        'features' => [
-                            'feature1',
-                            'pay-as-you-go',
-                        ],
+                    'name' => 'test',
+                    'features' => [
+                        'feature1',
+                        'pay-as-you-go',
                     ],
-                ]
+                ],
             ];
         }
         $storageApiClient = $this->createMock(StorageApiClient::class);
