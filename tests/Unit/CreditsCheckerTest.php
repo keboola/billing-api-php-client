@@ -43,28 +43,12 @@ class CreditsCheckerTest extends TestCase
     {
         $storageApiClient = $this->getStorageApiMock(
             [
-                'services' => [
-                    [
-                        'id' => 'graph',
-                        'url' => 'https://graph.keboola.com',
-                    ],
-                    [
-                        'id' => 'encryption',
-                        'url' => 'https://encryption.keboola.com',
-                    ],
-                    [
-                        'id' => 'billing',
-                        'url' => 'https://billing.keboola.com',
-                    ],
-                ],
-            ],
-            [
                 'id' => '123',
                 'owner' => [
                     'id' => '123',
                     'name' => 'test',
                     'features' => [
-                        'transformation-config-storage',
+                        'feature1',
                     ],
                 ],
             ]
@@ -88,38 +72,11 @@ class CreditsCheckerTest extends TestCase
      */
     public function testCheckCreditsHasFeatureHasCredits(float $remainingCredits, bool $hasCredits): void
     {
-        $storageApiClient = $this->getStorageApiMock(
-            [
-                'services' => [
-                    [
-                        'id' => 'graph',
-                        'url' => 'https://graph.keboola.com',
-                    ],
-                    [
-                        'id' => 'encryption',
-                        'url' => 'https://encryption.keboola.com',
-                    ],
-                    [
-                        'id' => 'billing',
-                        'url' => 'https://billing.keboola.com',
-                    ],
-                ],
-            ],
-            [
-                'id' => '123',
-                'owner' => [
-                    'id' => '123',
-                    'name' => 'test',
-                    'features' => [
-                        'transformation-config-storage',
-                        'pay-as-you-go',
-                    ],
-                ],
-            ]
-        );
-
+        $storageApiClient = $this->getStorageApiMock();
         $billingClient = $this->createMock(Client::class);
-        $billingClient->method('getRemainingCredits')->willReturn($remainingCredits);
+        $billingClient->expects(self::once())
+            ->method('getRemainingCredits')
+            ->willReturn($remainingCredits);
         $creditsChecker = self::getMockBuilder(CreditsChecker::class)
             ->setMethods(['getBillingClient'])
             ->setConstructorArgs([new ClientFactory(), $storageApiClient])
@@ -130,8 +87,44 @@ class CreditsCheckerTest extends TestCase
         self::assertEquals($hasCredits, $creditsChecker->hasCredits());
     }
 
-    private function getStorageApiMock(array $indexData, array $verifyTokenData): StorageApiClient
+    /**
+     * @dataProvider valuesProvider
+     */
+    public function testCheckCreditsHasFeatureWithTopUp(float $remainingCredits, bool $hasCredits): void
     {
+        $storageApiClient = $this->getStorageApiMock();
+
+        $billingClient = $this->createMock(Client::class);
+        $billingClient->expects(self::once())
+            ->method('getRemainingCreditsWithOptionalTopUp')
+            ->willReturn($remainingCredits);
+        $creditsChecker = self::getMockBuilder(CreditsChecker::class)
+            ->setMethods(['getBillingClient'])
+            ->setConstructorArgs([new ClientFactory(), $storageApiClient])
+            ->getMock();
+        $creditsChecker->method('getBillingClient')
+            ->willReturn($billingClient);
+        /** @var CreditsChecker $creditsChecker */
+        self::assertEquals($hasCredits, $creditsChecker->hasCredits(true));
+    }
+
+    private function getStorageApiMock(array $verifyTokenData = []): StorageApiClient
+    {
+        if (!$verifyTokenData) {
+            $verifyTokenData = [
+                [
+                    'id' => '123',
+                    'owner' => [
+                        'id' => '123',
+                        'name' => 'test',
+                        'features' => [
+                            'feature1',
+                            'pay-as-you-go',
+                        ],
+                    ],
+                ]
+            ];
+        }
         $storageApiClient = $this->createMock(StorageApiClient::class);
         $storageApiClient->expects(self::once())
             ->method('indexAction')
@@ -140,7 +133,20 @@ class CreditsCheckerTest extends TestCase
                 self::assertEquals(['components'], $options->getExclude());
                 return true;
             }))
-            ->willReturn($indexData);
+            ->willReturn(
+                [
+                    'services' => [
+                        [
+                            'id' => 'encryption',
+                            'url' => 'https://encryption.keboola.com',
+                        ],
+                        [
+                            'id' => 'billing',
+                            'url' => 'https://billing.keboola.com',
+                        ],
+                    ],
+                ]
+            );
 
         $storageApiClient->expects(self::once())
             ->method('verifyToken')
