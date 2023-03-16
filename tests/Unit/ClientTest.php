@@ -68,7 +68,7 @@ class ClientTest extends TestCase
 
         $client = new Client($internalClient);
 
-        $result = $client->getRemainingCredits();
+        $result = $client->getRemainingCreditsWithOptionalTopUp();
 
         self::assertCount(1, $requestsMade);
         $request = $requestsMade[0]['request'];
