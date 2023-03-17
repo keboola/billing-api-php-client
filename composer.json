@@ -3,7 +3,7 @@
     "description": "PHP Client for Keboola Connection Billing API",
     "license": "MIT",
     "require": {
-        "php": ">=8",
+        "php": ">=8.2",
         "ext-json": "*",
         "keboola/storage-api-client": "^14.0",
         "symfony/validator": "^6.0"
