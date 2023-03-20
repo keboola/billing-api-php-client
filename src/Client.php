@@ -21,4 +21,11 @@ class Client
         $data = $this->internalClient->sendRequestWithResponse($request);
         return (double) $data['remaining'];
     }
+
+    public function getRemainingCreditsWithOptionalTopUp(): float
+    {
+        $request = new Request('POST', 'credits', []);
+        $data = $this->internalClient->sendRequestWithResponse($request);
+        return (double) $data['remaining'];
+    }
 }

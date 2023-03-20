@@ -46,7 +46,7 @@ class CreditsChecker
         return $this->clientFactory->createClient($url, $token);
     }
 
-    public function hasCredits(): bool
+    public function hasCredits(bool $tryTopUp = false): bool
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
@@ -56,6 +56,12 @@ class CreditsChecker
         if (!in_array('pay-as-you-go', $tokenInfo['owner']['features'])) {
             return true; // not a payg project, run everything
         }
-        return $this->getBillingClient($this->client->getTokenString())->getRemainingCredits() > 0;
+        if ($tryTopUp) {
+            $remaining = $this->getBillingClient($this->client->getTokenString())
+                ->getRemainingCreditsWithOptionalTopUp();
+        } else {
+            $remaining = $this->getBillingClient($this->client->getTokenString())->getRemainingCredits();
+        }
+        return $remaining > 0;
     }
 }
