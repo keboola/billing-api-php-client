@@ -14,7 +14,7 @@ class ConfirmSubscriptionParametersTest extends TestCase
     {
         $parameters = new ConfirmSubscriptionParameters(
             'subscription-id',
-            'project-id'
+            'project-id',
         );
 
         self::assertSame('subscription-id', $parameters->getSubscriptionId());
@@ -28,7 +28,7 @@ class ConfirmSubscriptionParametersTest extends TestCase
 
         new ConfirmSubscriptionParameters(
             '',
-            'project-id'
+            'project-id',
         );
     }
 
@@ -39,7 +39,7 @@ class ConfirmSubscriptionParametersTest extends TestCase
 
         new ConfirmSubscriptionParameters(
             'subscription-id',
-            ''
+            '',
         );
     }
 }

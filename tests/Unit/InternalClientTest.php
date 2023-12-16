@@ -24,7 +24,7 @@ class InternalClientTest extends TestCase
             'https://example.com/',
             'authHeader',
             'authToken',
-            $options
+            $options,
         );
     }
 
@@ -32,14 +32,14 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "abc" is invalid: This value should be a valid number'
+            'Invalid parameters when creating client: Value "abc" is invalid: This value should be a valid number',
         );
         new InternalClient(
             'https://example.com/',
             'authHeader',
             'authToken',
             // @phpstan-ignore-next-line we test passing invalid value
-            ['backoffMaxTries' => 'abc']
+            ['backoffMaxTries' => 'abc'],
         );
     }
 
@@ -47,14 +47,14 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "-1" is invalid: This value should be between 0 and 100.'
+            'Invalid parameters when creating client: Value "-1" is invalid: This value should be between 0 and 100.',
         );
         new InternalClient(
             'https://example.com/',
             'authHeader',
             'authToken',
             // @phpstan-ignore-next-line we test passing invalid value
-            ['backoffMaxTries' => -1]
+            ['backoffMaxTries' => -1],
         );
     }
 
@@ -62,14 +62,14 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "101" is invalid: This value should be between 0 and 100.'
+            'Invalid parameters when creating client: Value "101" is invalid: This value should be between 0 and 100.',
         );
         new InternalClient(
             'https://example.com/',
             'authHeader',
             'authToken',
             // @phpstan-ignore-next-line we test passing invalid value
-            ['backoffMaxTries' => 101]
+            ['backoffMaxTries' => 101],
         );
     }
 
@@ -77,7 +77,7 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
+            'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.',
         );
         new InternalClient('invalid url', 'authHeader', 'authToken');
     }
@@ -86,7 +86,7 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.'
+            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.',
         );
         new InternalClient('https://example.com/', '', 'authToken');
     }
@@ -95,7 +95,7 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.'
+            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.',
         );
         new InternalClient('https://example.com/', 'authHeader', '');
     }
@@ -104,7 +104,7 @@ class InternalClientTest extends TestCase
     {
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.'
+            'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.',
         );
         new InternalClient('invalid url', '', '');
     }
@@ -118,7 +118,7 @@ class InternalClientTest extends TestCase
                 '{
                     "remaining": "123.4343434343434343",
                     "consumed": "456.1212121212121212"
-                }'
+                }',
             ),
         ]);
         // Add the history middleware to the handler stack.
@@ -152,7 +152,7 @@ class InternalClientTest extends TestCase
             new Response(
                 200,
                 ['Content-Type' => 'application/json'],
-                'invalid json'
+                'invalid json',
             ),
         ]);
         // Add the history middleware to the handler stack.
@@ -177,7 +177,7 @@ class InternalClientTest extends TestCase
                 '{
                     "remaining": "123",
                     "consumed": "456"
-                }'
+                }',
             ),
         ]);
         // Add the history middleware to the handler stack.
@@ -202,12 +202,12 @@ class InternalClientTest extends TestCase
             new Response(
                 500,
                 ['Content-Type' => 'application/json'],
-                '{"message" => "Out of order"}'
+                '{"message" => "Out of order"}',
             ),
             new Response(
                 500,
                 ['Content-Type' => 'application/json'],
-                'Out of order'
+                'Out of order',
             ),
             new Response(
                 200,
@@ -215,7 +215,7 @@ class InternalClientTest extends TestCase
                 '{
                     "remaining": "123",
                     "consumed": "456"
-                }'
+                }',
             ),
         ]);
         // Add the history middleware to the handler stack.
@@ -248,7 +248,7 @@ class InternalClientTest extends TestCase
             $responses[] = new Response(
                 500,
                 ['Content-Type' => 'application/json'],
-                '{"message" => "Out of order"}'
+                '{"message" => "Out of order"}',
             );
         }
         $mock = new MockHandler($responses);
@@ -274,7 +274,7 @@ class InternalClientTest extends TestCase
             $responses[] = new Response(
                 500,
                 ['Content-Type' => 'application/json'],
-                '{"message" => "Out of order"}'
+                '{"message" => "Out of order"}',
             );
         }
         $mock = new MockHandler($responses);

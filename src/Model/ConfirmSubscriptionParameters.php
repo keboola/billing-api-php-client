@@ -13,7 +13,7 @@ class ConfirmSubscriptionParameters
 
     public function __construct(
         string $subscriptionId,
-        string $projectId
+        string $projectId,
     ) {
         if ($subscriptionId === '') {
             throw new InvalidArgumentException('Invalid subscription ID. The value must not be empty');

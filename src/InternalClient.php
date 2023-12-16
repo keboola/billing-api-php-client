@@ -53,18 +53,18 @@ class InternalClient
         string $billingUrl,
         string $authHeaderName,
         string $authToken,
-        array $options = []
+        array $options = [],
     ) {
         $validator = Validation::createValidator();
         $errors = $validator->validate($billingUrl, [new Url()]);
         $errors->addAll(
-            $validator->validate($billingUrl, [new NotBlank()])
+            $validator->validate($billingUrl, [new NotBlank()]),
         );
         $errors->addAll(
-            $validator->validate($authHeaderName, [new NotBlank()])
+            $validator->validate($authHeaderName, [new NotBlank()]),
         );
         $errors->addAll(
-            $validator->validate($authToken, [new NotBlank()])
+            $validator->validate($authToken, [new NotBlank()]),
         );
         if (!empty($options['backoffMaxTries'])) {
             $errors->addAll($validator->validate($options['backoffMaxTries'], [new Range(['min' => 0, 'max' => 100])]));
@@ -122,7 +122,7 @@ class InternalClient
         string $url,
         string $authHeaderName,
         string $authToken,
-        array $options
+        array $options,
     ): GuzzleClient {
         // Initialize handlers (start with those supplied in constructor)
         // having HandlerStack inside HandlerStack seem weird, but it is needed so that middlewares already registered
@@ -139,7 +139,7 @@ class InternalClient
                     ->withHeader('User-Agent', $options['userAgent'])
                     ->withHeader($authHeaderName, $authToken)
                     ->withHeader('Content-type', 'application/json');
-            }
+            },
         ));
 
         // Set client logger
@@ -148,8 +148,8 @@ class InternalClient
                 $options['logger'],
                 new MessageFormatter(
                     '{hostname} {req_header_User-Agent} - [{ts}] "{method} {resource} {protocol}/{version}"' .
-                    ' {code} {res_header_Content-Length}'
-                )
+                    ' {code} {res_header_Content-Length}',
+                ),
             ));
         }
 
@@ -161,7 +161,7 @@ class InternalClient
                 'retries' => self::CONNECT_RETRIES,
                 'connect_timeout' => self::CONNECT_TIMEOUT,
                 'timeout' => self::TRANSFER_TIMEOUT,
-            ]
+            ],
         );
     }
 
@@ -171,7 +171,7 @@ class InternalClient
             int $retries,
             RequestInterface $request,
             ?ResponseInterface $response = null,
-            ?Throwable $error = null
+            ?Throwable $error = null,
         ) use ($maxRetries) {
             if ($retries >= $maxRetries) {
                 return false;
