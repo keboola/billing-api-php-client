@@ -11,7 +11,7 @@ class ResolveTokenResult
 
     public function __construct(
         string $subscriptionId,
-        ?string $projectId
+        ?string $projectId,
     ) {
         $this->subscriptionId = $subscriptionId;
         $this->projectId = $projectId;

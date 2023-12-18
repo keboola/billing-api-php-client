@@ -48,7 +48,7 @@ class ManageClientTest extends TestCase
             'keboola.component',
             'standard',
             ['type' => 'small'],
-            72.7
+            72.7,
         );
 
         self::assertCount(1, $requestsMade);
@@ -69,7 +69,7 @@ class ManageClientTest extends TestCase
                 ],
                 'durationSeconds' => 72.7,
             ]),
-            (string) $request->getBody()
+            (string) $request->getBody(),
         );
 
         self::assertSame([
@@ -89,7 +89,7 @@ class ManageClientTest extends TestCase
         ResolveTokenParameters $parameters,
         array $expectedRequestData,
         array $responseData,
-        ResolveTokenResult $expectedResult
+        ResolveTokenResult $expectedResult,
     ): void {
         $requestsMade = [];
         $responses = [

@@ -39,7 +39,7 @@ class CreditsChecker
         if (!$url) {
             throw new BillingException(
                 sprintf('Service "%s" was not found in KBC services', 'billing'),
-                500
+                500,
             );
         }
 

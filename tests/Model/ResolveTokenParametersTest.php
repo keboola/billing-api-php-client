@@ -14,7 +14,7 @@ class ResolveTokenParametersTest extends TestCase
     {
         $parameters = new ResolveTokenParameters(
             'azure',
-            'token'
+            'token',
         );
 
         self::assertSame('azure', $parameters->getVendor());
@@ -28,7 +28,7 @@ class ResolveTokenParametersTest extends TestCase
 
         new ResolveTokenParameters(
             'foo',
-            'token'
+            'token',
         );
     }
 
@@ -39,7 +39,7 @@ class ResolveTokenParametersTest extends TestCase
 
         new ResolveTokenParameters(
             'azure',
-            ''
+            '',
         );
     }
 }

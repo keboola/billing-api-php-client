@@ -51,7 +51,7 @@ class CreditsCheckerTest extends TestCase
                         'feature1',
                     ],
                 ],
-            ]
+            ],
         );
 
         $creditsChecker = new CreditsChecker(new ClientFactory(), $storageApiClient);
@@ -143,7 +143,7 @@ class CreditsCheckerTest extends TestCase
                             'url' => 'https://billing.keboola.com',
                         ],
                     ],
-                ]
+                ],
             );
 
         $storageApiClient->expects(self::once())

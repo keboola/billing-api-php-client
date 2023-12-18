@@ -19,13 +19,13 @@ class ResolveTokenParameters
 
     public function __construct(
         string $vendor,
-        string $token
+        string $token,
     ) {
         if (!in_array($vendor, self::VALID_VENDORS, true)) {
             throw new InvalidArgumentException(sprintf(
                 'Invalid vendor "%s". Possible values are: %s',
                 $vendor,
-                implode(', ', array_map(fn(string $v) => sprintf('"%s"', $v), self::VALID_VENDORS))
+                implode(', ', array_map(fn(string $v) => sprintf('"%s"', $v), self::VALID_VENDORS)),
             ));
         }
 

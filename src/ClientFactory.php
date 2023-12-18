@@ -9,13 +9,13 @@ class ClientFactory
     public function createClient(
         string $billingUrl,
         string $authToken,
-        array $options = []
+        array $options = [],
     ): Client {
         $internalClient = new InternalClient(
             $billingUrl,
             'X-StorageApi-Token',
             $authToken,
-            $options
+            $options,
         );
 
         return new Client($internalClient);
@@ -24,13 +24,13 @@ class ClientFactory
     public function createManageClient(
         string $billingUrl,
         string $authToken,
-        array $options = []
+        array $options = [],
     ): ManageClient {
         $internalClient = new InternalClient(
             $billingUrl,
             'X-KBC-ManageApiToken',
             $authToken,
-            $options
+            $options,
         );
 
         return new ManageClient($internalClient);

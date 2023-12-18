@@ -24,7 +24,7 @@ class ManageClient
         string $componentId,
         string $jobType,
         array $backend,
-        float $durationSeconds
+        float $durationSeconds,
     ): array {
         $request = new Request('PUT', 'duration/job', [], json_encode([
             'projectId' => $projectId,
