@@ -11,6 +11,7 @@ use GuzzleHttp\Psr7\Response;
 use Keboola\BillingApi\InternalClient;
 use Keboola\BillingApi\ManageClient;
 use Keboola\BillingApi\Model\ConfirmSubscriptionParameters;
+use Keboola\BillingApi\Model\MarketplaceVendor;
 use Keboola\BillingApi\Model\ResolveTokenParameters;
 use Keboola\BillingApi\Model\ResolveTokenResult;
 use PHPUnit\Framework\TestCase;
@@ -105,7 +106,7 @@ class ManageClientTest extends TestCase
         $client = new ManageClient($internalClient);
 
         $result = $client->resolveMarketplaceToken(new ResolveTokenParameters(
-            'azure',
+            MarketplaceVendor::AZURE,
             'token-value',
         ));
 
@@ -125,7 +126,7 @@ class ManageClientTest extends TestCase
     {
         yield 'new subscription without project' => [
             'parameters' => new ResolveTokenParameters(
-                'azure',
+                MarketplaceVendor::AZURE,
                 'token-value',
             ),
             'expectedRequestData' => [
@@ -134,17 +135,19 @@ class ManageClientTest extends TestCase
             ],
             'responseData' => [
                 'subscriptionId' => 'subscription-id',
+                'organizationId' => null,
                 'projectId' => null,
             ],
             'expectedResult' => new ResolveTokenResult(
                 'subscription-id',
                 null,
+                null,
             ),
         ];
 
-        yield 'existing subscription with project' => [
+        yield 'existing subscription with organization and project' => [
             'parameters' => new ResolveTokenParameters(
-                'azure',
+                MarketplaceVendor::AZURE,
                 'token-value',
             ),
             'expectedRequestData' => [
@@ -153,10 +156,12 @@ class ManageClientTest extends TestCase
             ],
             'responseData' => [
                 'subscriptionId' => 'subscription-id',
+                'organizationId' => 'organization-id',
                 'projectId' => 'project-id',
             ],
             'expectedResult' => new ResolveTokenResult(
                 'subscription-id',
+                'organization-id',
                 'project-id',
             ),
         ];
@@ -179,6 +184,7 @@ class ManageClientTest extends TestCase
 
         $client->confirmMarketplaceSubscription(new ConfirmSubscriptionParameters(
             'subscription-id',
+            'organization-id',
             'project-id',
         ));
 
@@ -191,6 +197,7 @@ class ManageClientTest extends TestCase
         self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
         self::assertSame(json_encode([
             'subscriptionId' => 'subscription-id',
+            'organizationId' => 'organization-id',
             'projectId' => 'project-id',
         ]), (string) $request->getBody());
     }

@@ -8,32 +8,21 @@ use InvalidArgumentException;
 
 class ConfirmSubscriptionParameters
 {
-    private string $subscriptionId;
-    private string $projectId;
-
     public function __construct(
-        string $subscriptionId,
-        string $projectId,
+        public readonly string $subscriptionId,
+        public readonly string $organizationId,
+        public readonly string $projectId,
     ) {
-        if ($subscriptionId === '') {
+        if ($this->subscriptionId === '') {
             throw new InvalidArgumentException('Invalid subscription ID. The value must not be empty');
         }
 
-        if ($projectId === '') {
-            throw new InvalidArgumentException('Invalid project ID. The value must not be empty');
+        if ($this->organizationId === '') {
+            throw new InvalidArgumentException('Invalid organization ID. The value must not be empty');
         }
 
-        $this->subscriptionId = $subscriptionId;
-        $this->projectId = $projectId;
-    }
-
-    public function getSubscriptionId(): string
-    {
-        return $this->subscriptionId;
-    }
-
-    public function getProjectId(): string
-    {
-        return $this->projectId;
+        if ($this->projectId === '') {
+            throw new InvalidArgumentException('Invalid project ID. The value must not be empty');
+        }
     }
 }
