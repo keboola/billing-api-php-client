@@ -40,8 +40,8 @@ class ManageClient
     public function resolveMarketplaceToken(ResolveTokenParameters $parameters): ResolveTokenResult
     {
         $request = new Request('POST', 'marketplaces/resolve-token', [], json_encode([
-            'vendor' => $parameters->getVendor(),
-            'token' => $parameters->getToken(),
+            'vendor' => $parameters->vendor->value,
+            'token' => $parameters->token,
         ], JSON_THROW_ON_ERROR));
 
         $response = $this->internalClient->sendRequestWithResponse($request);
@@ -51,8 +51,9 @@ class ManageClient
     public function confirmMarketplaceSubscription(ConfirmSubscriptionParameters $parameters): void
     {
         $request = new Request('POST', 'marketplaces/confirm-subscription', [], json_encode([
-            'subscriptionId' => $parameters->getSubscriptionId(),
-            'projectId' => $parameters->getProjectId(),
+            'subscriptionId' => $parameters->subscriptionId,
+            'organizationId' => $parameters->organizationId,
+            'projectId' => $parameters->projectId,
         ], JSON_THROW_ON_ERROR));
 
         $this->internalClient->sendRequestWithoutResponse($request);

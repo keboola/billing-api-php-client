@@ -10,23 +10,25 @@ use PHPUnit\Framework\TestCase;
 
 class ConfirmSubscriptionParametersTest extends TestCase
 {
-    public function testCreate(): void
-    {
-        $parameters = new ConfirmSubscriptionParameters(
-            'subscription-id',
-            'project-id',
-        );
-
-        self::assertSame('subscription-id', $parameters->getSubscriptionId());
-        self::assertSame('project-id', $parameters->getProjectId());
-    }
-
     public function testSubscriptionIdMustNotBeEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid subscription ID. The value must not be empty');
 
         new ConfirmSubscriptionParameters(
+            '',
+            'organization-id',
+            'project-id',
+        );
+    }
+
+    public function testOrganizationIdMustNotBeEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid organization ID. The value must not be empty');
+
+        new ConfirmSubscriptionParameters(
+            'subscription-id',
             '',
             'project-id',
         );
@@ -39,6 +41,7 @@ class ConfirmSubscriptionParametersTest extends TestCase
 
         new ConfirmSubscriptionParameters(
             'subscription-id',
+            'organization-id',
             '',
         );
     }
