@@ -135,11 +135,29 @@ class ManageClientTest extends TestCase
             ],
             'responseData' => [
                 'subscriptionId' => 'subscription-id',
+                'subscriptionData' => [
+                    'subscription' => [
+                        'beneficiary' => [
+                            'tenantId' => 'tenant-id',
+                        ],
+                    ],
+                    'offerId' => 123,
+                    'planId' => 123,
+                ],
                 'organizationId' => null,
                 'projectId' => null,
             ],
             'expectedResult' => new ResolveTokenResult(
                 'subscription-id',
+                [
+                    'subscription' => [
+                        'beneficiary' => [
+                            'tenantId' => 'tenant-id',
+                        ],
+                    ],
+                    'offerId' => 123,
+                    'planId' => 123,
+                ],
                 null,
                 null,
             ),
@@ -156,11 +174,29 @@ class ManageClientTest extends TestCase
             ],
             'responseData' => [
                 'subscriptionId' => 'subscription-id',
+                'subscriptionData' => [
+                    'subscription' => [
+                        'beneficiary' => [
+                            'tenantId' => 'tenant-id',
+                        ],
+                    ],
+                    'offerId' => 123,
+                    'planId' => 123,
+                ],
                 'organizationId' => 'organization-id',
                 'projectId' => 'project-id',
             ],
             'expectedResult' => new ResolveTokenResult(
                 'subscription-id',
+                [
+                    'subscription' => [
+                        'beneficiary' => [
+                            'tenantId' => 'tenant-id',
+                        ],
+                    ],
+                    'offerId' => 123,
+                    'planId' => 123,
+                ],
                 'organization-id',
                 'project-id',
             ),
