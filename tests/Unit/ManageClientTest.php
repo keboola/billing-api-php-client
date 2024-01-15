@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Keboola\BillingApi\Unit;
 
+use DateTimeImmutable;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -134,22 +135,17 @@ class ManageClientTest extends TestCase
                 'token' => 'token-value',
             ],
             'responseData' => [
-                'subscriptionId' => 'subscription-id',
-                'subscriptionData' => [
-                    'subscription' => [
-                        'beneficiary' => [
-                            'tenantId' => 'tenant-id',
-                        ],
-                    ],
-                    'offerId' => 123,
-                    'planId' => 123,
-                ],
+                'id' => 'subscription-id',
+                'vendor' => 'aws',
+                'vendorSubscriptionId' => '456',
+                'productId' => '789',
+                'planId' => 'plan',
+                'state' => 'inactive',
                 'organizationId' => null,
                 'projectId' => null,
-            ],
-            'expectedResult' => new ResolveTokenResult(
-                'subscription-id',
-                [
+                'dateCreated' => '2021-01-01T00:00:00+00:00',
+                'dateModified' => '2022-01-01T00:00:00+00:00',
+                'vendorData' => [
                     'subscription' => [
                         'beneficiary' => [
                             'tenantId' => 'tenant-id',
@@ -158,8 +154,27 @@ class ManageClientTest extends TestCase
                     'offerId' => 123,
                     'planId' => 123,
                 ],
-                null,
-                null,
+            ],
+            'expectedResult' => new ResolveTokenResult(
+                id: 'subscription-id',
+                vendor: 'aws',
+                vendorSubscriptionId: '456',
+                productId: '789',
+                planId: 'plan',
+                state: 'inactive',
+                organizationId: null,
+                projectId: null,
+                dateCreated: new DateTimeImmutable('2021-01-01T00:00:00+00:00'),
+                dateModified: new DateTimeImmutable('2022-01-01T00:00:00+00:00'),
+                vendorData: [
+                    'subscription' => [
+                        'beneficiary' => [
+                            'tenantId' => 'tenant-id',
+                        ],
+                    ],
+                    'offerId' => 123,
+                    'planId' => 123,
+                ],
             ),
         ];
 
@@ -173,22 +188,17 @@ class ManageClientTest extends TestCase
                 'token' => 'token-value',
             ],
             'responseData' => [
-                'subscriptionId' => 'subscription-id',
-                'subscriptionData' => [
-                    'subscription' => [
-                        'beneficiary' => [
-                            'tenantId' => 'tenant-id',
-                        ],
-                    ],
-                    'offerId' => 123,
-                    'planId' => 123,
-                ],
+                'id' => 'subscription-id',
+                'vendor' => 'aws',
+                'vendorSubscriptionId' => '456',
+                'productId' => '789',
+                'planId' => 'plan',
+                'state' => 'inactive',
                 'organizationId' => 'organization-id',
                 'projectId' => 'project-id',
-            ],
-            'expectedResult' => new ResolveTokenResult(
-                'subscription-id',
-                [
+                'dateCreated' => '2021-01-01T00:00:00+00:00',
+                'dateModified' => '2022-01-01T00:00:00+00:00',
+                'vendorData' => [
                     'subscription' => [
                         'beneficiary' => [
                             'tenantId' => 'tenant-id',
@@ -197,8 +207,27 @@ class ManageClientTest extends TestCase
                     'offerId' => 123,
                     'planId' => 123,
                 ],
-                'organization-id',
-                'project-id',
+            ],
+            'expectedResult' => new ResolveTokenResult(
+                id: 'subscription-id',
+                vendor: 'aws',
+                vendorSubscriptionId: '456',
+                productId: '789',
+                planId: 'plan',
+                state: 'inactive',
+                organizationId: 'organization-id',
+                projectId: 'project-id',
+                dateCreated: new DateTimeImmutable('2021-01-01T00:00:00+00:00'),
+                dateModified: new DateTimeImmutable('2022-01-01T00:00:00+00:00'),
+                vendorData: [
+                    'subscription' => [
+                        'beneficiary' => [
+                            'tenantId' => 'tenant-id',
+                        ],
+                    ],
+                    'offerId' => 123,
+                    'planId' => 123,
+                ],
             ),
         ];
     }
