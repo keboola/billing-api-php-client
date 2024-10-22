@@ -22,15 +22,15 @@ var_dump($credits);
 - With the above setup, you can run tests:
 
     ```bash
-    docker-compose build
-    docker-compose run tests
+    docker compose build
+    docker compose run tests
     ```
 
 - To run tests with local code use:
 
     ```bash
-    docker-compose run tests-local composer install
-    docker-compose run tests-local
+    docker compose run tests-local composer install
+    docker compose run tests-local
     ```
 
 ## License
