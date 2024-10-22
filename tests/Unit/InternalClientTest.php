@@ -9,12 +9,11 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Keboola\BillingApi\Client;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\BillingApi\InternalClient;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
-use Psr\Log\Test\TestLogger;
 
 class InternalClientTest extends TestCase
 {
@@ -185,15 +184,18 @@ class InternalClientTest extends TestCase
         $history = Middleware::history($requestHistory);
         $stack = HandlerStack::create($mock);
         $stack->push($history);
-        $logger = new TestLogger();
+
+        $logsHandler = new TestHandler();
+        $logger = new Logger('test', [$logsHandler]);
+
         $client = $this->getClient(['handler' => $stack, 'logger' => $logger, 'userAgent' => 'test agent']);
         $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
         $request = $requestHistory[0]['request'];
         self::assertInstanceOf(Request::class, $request);
         self::assertEquals('test agent', $request->getHeader('User-Agent')[0]);
-        self::assertTrue($logger->hasInfoThatContains('"GET  /1.1" 200 '));
-        self::assertTrue($logger->hasInfoThatContains('test agent'));
+        self::assertTrue($logsHandler->hasInfoThatContains('"GET  /1.1" 200 '));
+        self::assertTrue($logsHandler->hasInfoThatContains('test agent'));
     }
 
     public function testRetrySuccess(): void
