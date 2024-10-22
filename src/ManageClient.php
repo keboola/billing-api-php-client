@@ -37,6 +37,23 @@ class ManageClient
         return $this->internalClient->sendRequestWithResponse($request);
     }
 
+    public function recordContainerSandboxDuration(
+        string $projectId,
+        string $sandboxId,
+        string $sandboxType,
+        string $sandboxSize,
+        float $durationSeconds,
+    ): void {
+        $request = new Request('PUT', 'duration/container-sandbox', [], json_encode([
+            'projectId' => $projectId,
+            'sandboxId' => $sandboxId,
+            'sandboxType' => $sandboxType,
+            'sandboxSize' => $sandboxSize,
+            'durationSeconds' => $durationSeconds,
+        ], JSON_THROW_ON_ERROR));
+        $this->internalClient->sendRequestWithResponse($request);
+    }
+
     public function resolveMarketplaceToken(ResolveTokenParameters $parameters): ResolveTokenResult
     {
         $request = new Request('POST', 'marketplaces/resolve-token', [], json_encode([

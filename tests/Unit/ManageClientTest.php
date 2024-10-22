@@ -86,6 +86,48 @@ class ManageClientTest extends TestCase
         ], $result);
     }
 
+    public function testRecordContainerSandboxDuration(): void
+    {
+        $requestsMade = [];
+        $responses = [
+            new Response(200),
+        ];
+
+        $handlerStack = HandlerStack::create(new MockHandler($responses));
+        $handlerStack->push(Middleware::history($requestsMade));
+        $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
+            'handler' => $handlerStack,
+        ]);
+
+        $client = new ManageClient($internalClient);
+
+        $client->recordContainerSandboxDuration(
+            'project-id',
+            'sandbox-id',
+            'sandbox-type',
+            'sandbox-size',
+            14.1,
+        );
+
+        self::assertCount(1, $requestsMade);
+        $request = $requestsMade[0]['request'];
+
+        self::assertInstanceOf(RequestInterface::class, $request);
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('http://example.com/duration/container-sandbox', (string) $request->getUri());
+        self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
+        self::assertSame(
+            json_encode([
+                'projectId' => 'project-id',
+                'sandboxId' => 'sandbox-id',
+                'sandboxType' => 'sandbox-type',
+                'sandboxSize' => 'sandbox-size',
+                'durationSeconds' => 14.1,
+            ]),
+            (string) $request->getBody(),
+        );
+    }
+
     /** @dataProvider provideResolveMarketplaceTokenTestData */
     public function testResolveMarketplaceToken(
         ResolveTokenParameters $parameters,

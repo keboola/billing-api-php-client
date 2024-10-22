@@ -91,7 +91,12 @@ class InternalClient
         try {
             $response = $this->guzzle->send($request);
 
-            $data = (array) json_decode($response->getBody()->getContents(), true);
+            $responseContents = $response->getBody()->getContents();
+            if ($responseContents === '') {
+                return [];
+            }
+
+            $data = (array) json_decode($responseContents, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new BillingException('Unable to parse response body into JSON: ' . json_last_error_msg());
             }

@@ -145,6 +145,33 @@ class InternalClientTest extends TestCase
         self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
     }
 
+    public function testClientRequestEmptyResponse(): void
+    {
+        $mock = new MockHandler([
+            new Response(200),
+        ]);
+        // Add the history middleware to the handler stack.
+        $requestHistory = [];
+        $history = Middleware::history($requestHistory);
+        $stack = HandlerStack::create($mock);
+        $stack->push($history);
+
+        $client = $this->getClient(['handler' => $stack]);
+        $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
+
+        self::assertSame([], $response);
+
+        self::assertCount(1, $requestHistory);
+
+        $request = $requestHistory[0]['request'];
+        self::assertInstanceOf(Request::class, $request);
+        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
+        self::assertEquals('GET', $request->getMethod());
+        self::assertEquals('authToken', $request->getHeader('authHeader')[0]);
+        self::assertEquals('Billing PHP Client', $request->getHeader('User-Agent')[0]);
+        self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
+    }
+
     public function testInvalidResponse(): void
     {
         $mock = new MockHandler([
