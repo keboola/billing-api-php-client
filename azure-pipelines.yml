@@ -22,8 +22,8 @@ stages:
           - script: |
               set -Eeuo pipefail
 
-              docker-compose build --pull
-              docker-compose run --rm tests
+              docker compose build --pull
+              docker compose run --rm tests
             displayName: 'Build & Run Tests'
 
           - task: PublishTestResults@2
