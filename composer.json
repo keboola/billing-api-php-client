@@ -5,7 +5,7 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
-        "keboola/storage-api-client": "^14.0",
+        "keboola/storage-api-client": "^15.4.0",
         "symfony/validator": "^6.0"
     },
     "require-dev": {
