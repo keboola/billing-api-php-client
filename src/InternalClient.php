@@ -25,13 +25,13 @@ use Throwable;
 
 /**
  * @phpstan-type Options array{
- *     handler?: HandlerStack,
- *     backoffMaxTries: positive-int,
+ *     handler?: (callable(RequestInterface, array): PromiseInterface),
+ *     backoffMaxTries?: int<0, 100>,
  *     timeout?: null|float,
  *     connectTimeout?: null|float,
- *     userAgent: string,
+ *     userAgent?: string,
  *     logger?: LoggerInterface
- * }
+ *  }
  */
 class InternalClient
 {
@@ -44,14 +44,7 @@ class InternalClient
     private GuzzleClient $guzzle;
 
     /**
-     * @param array{
-     *     handler?: (callable(RequestInterface, array): PromiseInterface),
-     *     backoffMaxTries?: int<0, 100>,
-     *     timeout?: null|float,
-     *     connectTimeout?: null|float,
-     *     userAgent?: string,
-     *     logger?: LoggerInterface
-     * } $options
+     * @param Options $options
      */
     public function __construct(
         string $billingUrl,

@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace Keboola\BillingApi;
 
+/**
+ * @phpstan-import-type Options from InternalClient
+ */
 class ClientFactory
 {
+    /**
+     * @param Options $options
+     * @return Client
+     */
     public function createClient(
         string $billingUrl,
         string $authToken,
