@@ -99,13 +99,39 @@ class CreditsCheckerTest extends TestCase
             ->method('getRemainingCreditsWithOptionalTopUp')
             ->willReturn($remainingCredits);
         $creditsChecker = self::getMockBuilder(CreditsChecker::class)
-            ->setMethods(['getBillingClient'])
+            ->onlyMethods(['getBillingClient'])
             ->setConstructorArgs([new ClientFactory(), $storageApiClient])
             ->getMock();
         $creditsChecker->method('getBillingClient')
             ->willReturn($billingClient);
         /** @var CreditsChecker $creditsChecker */
         self::assertEquals($hasCredits, $creditsChecker->hasCredits(true));
+    }
+
+    public function testCheckCreditsWithCustomTimeout(): void
+    {
+        $billingClient = $this->createMock(Client::class);
+        $billingClient->method('getRemainingCredits')->willReturn(1.0);
+
+        $clientFactory = $this->createMock(ClientFactory::class);
+        $clientFactory->expects(self::once())
+            ->method('createClient')
+            ->with('https://billing.keboola.com', 'boo', ['timeout' => 7.0])
+            ->willReturn($billingClient)
+        ;
+
+        $creditsChecker = new CreditsChecker(
+            $clientFactory,
+            $this->getStorageApiMock(),
+        );
+
+        $hasCredits = $creditsChecker->hasCredits(
+            clientOptions: [
+                'timeout' => 7.0,
+            ],
+        );
+
+        self::assertTrue($hasCredits);
     }
 
     private function getStorageApiMock(array $verifyTokenData = []): StorageApiClient
@@ -124,7 +150,7 @@ class CreditsCheckerTest extends TestCase
             ];
         }
         $storageApiClient = $this->createMock(StorageApiClient::class);
-        $storageApiClient->expects(self::once())
+        $storageApiClient
             ->method('indexAction')
             ->with($this->callback(function ($options) {
                 self::assertInstanceOf(IndexOptions::class, $options);

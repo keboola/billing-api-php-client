@@ -8,6 +8,9 @@ use Keboola\BillingApi\Exception\BillingException;
 use Keboola\StorageApi\Client as StorageApiClient;
 use Keboola\StorageApi\Options\IndexOptions;
 
+/**
+ * @phpstan-import-type Options from InternalClient as ClientOptions
+ */
 class CreditsChecker
 {
     private ClientFactory $clientFactory;
@@ -33,7 +36,10 @@ class CreditsChecker
         return null;
     }
 
-    public function getBillingClient(string $token): Client
+    /**
+     * @param ClientOptions $options
+     */
+    public function getBillingClient(string $token, array $options = []): Client
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
@@ -43,10 +49,13 @@ class CreditsChecker
             );
         }
 
-        return $this->clientFactory->createClient($url, $token);
+        return $this->clientFactory->createClient($url, $token, $options);
     }
 
-    public function hasCredits(bool $tryTopUp = false): bool
+    /**
+     * @param ClientOptions $clientOptions
+     */
+    public function hasCredits(bool $tryTopUp = false, array $clientOptions = []): bool
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
@@ -56,11 +65,13 @@ class CreditsChecker
         if (!in_array('pay-as-you-go', $tokenInfo['owner']['features'])) {
             return true; // not a payg project, run everything
         }
+
+        $billingClient = $this->getBillingClient($this->client->getTokenString(), $clientOptions);
+
         if ($tryTopUp) {
-            $remaining = $this->getBillingClient($this->client->getTokenString())
-                ->getRemainingCreditsWithOptionalTopUp();
+            $remaining = $billingClient->getRemainingCreditsWithOptionalTopUp();
         } else {
-            $remaining = $this->getBillingClient($this->client->getTokenString())->getRemainingCredits();
+            $remaining = $billingClient->getRemainingCredits();
         }
         return $remaining > 0;
     }
