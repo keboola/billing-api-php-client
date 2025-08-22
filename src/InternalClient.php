@@ -27,6 +27,8 @@ use Throwable;
  * @phpstan-type Options array{
  *     handler?: HandlerStack,
  *     backoffMaxTries: positive-int,
+ *     timeout?: null|float,
+ *     connectTimeout?: null|float,
  *     userAgent: string,
  *     logger?: LoggerInterface
  * }
@@ -35,9 +37,9 @@ class InternalClient
 {
     private const DEFAULT_USER_AGENT = 'Billing PHP Client';
     private const DEFAULT_BACKOFF_RETRIES = 10;
-    private const CONNECT_TIMEOUT = 10;
+    private const CONNECT_TIMEOUT = 10.0;
     private const CONNECT_RETRIES = 0;
-    private const TRANSFER_TIMEOUT = 120;
+    private const TRANSFER_TIMEOUT = 120.0;
 
     private GuzzleClient $guzzle;
 
@@ -45,6 +47,8 @@ class InternalClient
      * @param array{
      *     handler?: (callable(RequestInterface, array): PromiseInterface),
      *     backoffMaxTries?: int<0, 100>,
+     *     timeout?: null|float,
+     *     connectTimeout?: null|float,
      *     userAgent?: string,
      *     logger?: LoggerInterface
      * } $options
@@ -119,6 +123,8 @@ class InternalClient
      * @param array{
      *     handler?: (callable(RequestInterface, array): PromiseInterface),
      *     backoffMaxTries: int<0, 100>,
+     *     timeout?: null|float,
+     *     connectTimeout?: null|float,
      *     userAgent: string,
      *     logger?: LoggerInterface
      * } $options
@@ -164,8 +170,8 @@ class InternalClient
                 'base_uri' => $url,
                 'handler' => $handlerStack,
                 'retries' => self::CONNECT_RETRIES,
-                'connect_timeout' => self::CONNECT_TIMEOUT,
-                'timeout' => self::TRANSFER_TIMEOUT,
+                'connect_timeout' => $options['connectTimeout'] ?? self::CONNECT_TIMEOUT,
+                'timeout' => $options['timeout'] ?? self::TRANSFER_TIMEOUT,
             ],
         );
     }

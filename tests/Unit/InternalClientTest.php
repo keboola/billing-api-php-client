@@ -321,4 +321,63 @@ class InternalClientTest extends TestCase
         }
         self::assertCount(4, $requestHistory);
     }
+
+    public static function provideClientTimeoutOptions(): iterable
+    {
+        yield 'defaults' => [
+            'options' => [],
+            'expectedTimeout' => 120.0,
+            'expectedConnectTimeout' => 10.0,
+        ];
+
+        yield 'custom timeouts' => [
+            'options' => [
+                'timeout' => 100.5,
+                'connectTimeout' => 50.0,
+            ],
+            'expectedTimeout' => 100.5,
+            'expectedConnectTimeout' => 50.0,
+        ];
+    }
+
+    /** @dataProvider provideClientTimeoutOptions */
+    public function testTimeoutConfiguration(
+        array $options,
+        float $expectedTimeout,
+        float $expectedConnectTimeout,
+    ): void {
+        $mock = new MockHandler([
+            new Response(
+                200,
+                ['Content-Type' => 'application/json'],
+                '{
+                    "remaining": "123.4343434343434343",
+                    "consumed": "456.1212121212121212"
+                }',
+            ),
+        ]);
+
+        // Add the history middleware to the handler stack.
+        $requestHistory = [];
+        $history = Middleware::history($requestHistory);
+        $stack = HandlerStack::create($mock);
+        $stack->push($history);
+
+        $client = $this->getClient([
+            'handler' => $stack,
+            ...$options,
+        ]);
+        $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
+
+        self::assertSame([
+            'remaining' => '123.4343434343434343',
+            'consumed' => '456.1212121212121212',
+        ], $response);
+
+        self::assertCount(1, $requestHistory);
+
+        $options = $requestHistory[0]['options'];
+        self::assertSame($expectedTimeout, $options['timeout'] ?? null);
+        self::assertSame($expectedConnectTimeout, $options['connect_timeout'] ?? null);
+    }
 }
