@@ -1,4 +1,4 @@
-FROM php:8.1-cli
+FROM php:8.2-cli
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV XDEBUG_MODE=coverage
