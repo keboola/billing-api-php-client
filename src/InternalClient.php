@@ -34,6 +34,8 @@ use Symfony\Component\Validator\Validation;
 class InternalClient
 {
     private const DEFAULT_USER_AGENT = 'Billing PHP Client';
+    // Billing intentionally retries more than the shared base client's default of 5.
+    // Keep this value (always passed explicitly to ApiClientOptions) so the lower base default is never inherited.
     private const DEFAULT_BACKOFF_RETRIES = 10;
     private const DEFAULT_CONNECT_TIMEOUT = 10;
     private const DEFAULT_REQUEST_TIMEOUT = 120;
