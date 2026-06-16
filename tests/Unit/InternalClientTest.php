@@ -8,6 +8,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Keboola\ApiClientBase\Auth\StorageApiTokenAuthenticator;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\BillingApi\InternalClient;
 use Monolog\Handler\TestHandler;
@@ -20,8 +21,7 @@ class InternalClientTest extends TestCase
     {
         return new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             $options,
         );
     }
@@ -34,8 +34,7 @@ class InternalClientTest extends TestCase
         );
         new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => 'abc'],
         );
@@ -49,8 +48,7 @@ class InternalClientTest extends TestCase
         );
         new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => -1],
         );
@@ -64,8 +62,7 @@ class InternalClientTest extends TestCase
         );
         new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => 101],
         );
@@ -77,34 +74,7 @@ class InternalClientTest extends TestCase
         $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.',
         );
-        new InternalClient('invalid url', 'authHeader', 'authToken');
-    }
-
-    public function testCreateClientInvalidAuthHeader(): void
-    {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.',
-        );
-        new InternalClient('https://example.com/', '', 'authToken');
-    }
-
-    public function testCreateClientInvalidAuthToken(): void
-    {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.',
-        );
-        new InternalClient('https://example.com/', 'authHeader', '');
-    }
-
-    public function testCreateClientMultipleErrors(): void
-    {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.',
-        );
-        new InternalClient('invalid url', '', '');
+        new InternalClient('invalid url', new StorageApiTokenAuthenticator('authToken'));
     }
 
     public function testClientRequestResponse(): void
@@ -132,7 +102,7 @@ class InternalClientTest extends TestCase
         self::assertNotNull($request);
         self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
         self::assertEquals('GET', $request->getMethod());
-        self::assertEquals('authToken', $request->getHeaderLine('authHeader'));
+        self::assertEquals('authToken', $request->getHeaderLine('X-StorageApi-Token'));
         self::assertEquals('Billing PHP Client', $request->getHeaderLine('User-Agent'));
         self::assertEquals('application/json', $request->getHeaderLine('Content-type'));
     }

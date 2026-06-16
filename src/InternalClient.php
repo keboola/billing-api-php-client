@@ -9,8 +9,8 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use Keboola\ApiClientBase\ApiClient;
 use Keboola\ApiClientBase\ApiClientOptions;
+use Keboola\ApiClientBase\Auth\RequestAuthenticatorInterface;
 use Keboola\ApiClientBase\Exception\ClientException;
-use Keboola\BillingApi\Auth\HeaderTokenAuthenticator;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\BillingApi\Model\ArrayResponse;
 use Psr\Http\Message\RequestInterface;
@@ -43,20 +43,13 @@ class InternalClient
      */
     public function __construct(
         string $billingUrl,
-        string $authHeaderName,
-        string $authToken,
+        RequestAuthenticatorInterface $authenticator,
         array $options = [],
     ) {
         $validator = Validation::createValidator();
         $errors = $validator->validate($billingUrl, [new Url()]);
         $errors->addAll(
             $validator->validate($billingUrl, [new NotBlank()]),
-        );
-        $errors->addAll(
-            $validator->validate($authHeaderName, [new NotBlank()]),
-        );
-        $errors->addAll(
-            $validator->validate($authToken, [new NotBlank()]),
         );
         if (!empty($options['backoffMaxTries'])) {
             $errors->addAll($validator->validate($options['backoffMaxTries'], [new Range(['min' => 0, 'max' => 100])]));
@@ -81,7 +74,7 @@ class InternalClient
 
         $this->apiClient = new ApiClient(
             $billingUrl,
-            new HeaderTokenAuthenticator($authHeaderName, $authToken),
+            $authenticator,
             new ApiClientOptions(
                 userAgent: $options['userAgent'],
                 backoffMaxTries: $options['backoffMaxTries'],

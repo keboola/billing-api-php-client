@@ -32,6 +32,19 @@ $manageClient = $factory->createManageClient('https://billing.keboola.com/', $ma
 `createClient()` and `createManageClient()` accept an optional `$options` array
 (`backoffMaxTries`, `timeout`, `connectTimeout`, `userAgent`, `logger`).
 
+For a custom authentication scheme, construct `InternalClient` directly with any
+`Keboola\ApiClientBase\Auth\RequestAuthenticatorInterface` implementation:
+
+```php
+use Keboola\ApiClientBase\Auth\ManageApiTokenAuthenticator;
+use Keboola\BillingApi\InternalClient;
+use Keboola\BillingApi\ManageClient;
+
+$manageClient = new ManageClient(
+    new InternalClient('https://billing.keboola.com/', new ManageApiTokenAuthenticator($manageApiToken)),
+);
+```
+
 ## Run tests
 - With the above setup, you can run tests:
 

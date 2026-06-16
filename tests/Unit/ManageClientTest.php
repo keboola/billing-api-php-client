@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Keboola\ApiClientBase\Auth\ManageApiTokenAuthenticator;
 use Keboola\BillingApi\InternalClient;
 use Keboola\BillingApi\ManageClient;
 use Keboola\BillingApi\Model\ConfirmSubscriptionParameters;
@@ -33,7 +34,7 @@ class ManageClientTest extends TestCase
             ])),
         ]);
 
-        $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
+        $internalClient = new InternalClient('http://example.com', new ManageApiTokenAuthenticator('dummy-token'), [
             'handler' => HandlerStack::create($mock),
         ]);
 
@@ -52,7 +53,7 @@ class ManageClientTest extends TestCase
         self::assertNotNull($request);
         self::assertSame('PUT', $request->getMethod());
         self::assertSame('http://example.com/duration/job', (string) $request->getUri());
-        self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
+        self::assertSame('dummy-token', $request->getHeaderLine('X-KBC-ManageApiToken'));
         self::assertSame(
             json_encode([
                 'projectId' => 'project-id',
@@ -85,7 +86,7 @@ class ManageClientTest extends TestCase
             new Response(200),
         ]);
 
-        $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
+        $internalClient = new InternalClient('http://example.com', new ManageApiTokenAuthenticator('dummy-token'), [
             'handler' => HandlerStack::create($mock),
         ]);
 
@@ -103,7 +104,7 @@ class ManageClientTest extends TestCase
         self::assertNotNull($request);
         self::assertSame('PUT', $request->getMethod());
         self::assertSame('http://example.com/duration/container-sandbox', (string) $request->getUri());
-        self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
+        self::assertSame('dummy-token', $request->getHeaderLine('X-KBC-ManageApiToken'));
         self::assertSame(
             json_encode([
                 'projectId' => 'project-id',
@@ -129,7 +130,7 @@ class ManageClientTest extends TestCase
             new Response(200, [], (string) json_encode($responseData)),
         ]);
 
-        $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
+        $internalClient = new InternalClient('http://example.com', new ManageApiTokenAuthenticator('dummy-token'), [
             'handler' => HandlerStack::create($mock),
         ]);
 
@@ -141,7 +142,7 @@ class ManageClientTest extends TestCase
         self::assertNotNull($request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame('http://example.com/marketplaces/resolve-token', (string) $request->getUri());
-        self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
+        self::assertSame('dummy-token', $request->getHeaderLine('X-KBC-ManageApiToken'));
         self::assertSame(json_encode($expectedRequestData), (string) $request->getBody());
 
         self::assertEquals($expectedResult, $result);
@@ -262,7 +263,7 @@ class ManageClientTest extends TestCase
             new Response(200),
         ]);
 
-        $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
+        $internalClient = new InternalClient('http://example.com', new ManageApiTokenAuthenticator('dummy-token'), [
             'handler' => HandlerStack::create($mock),
         ]);
 
@@ -278,7 +279,7 @@ class ManageClientTest extends TestCase
         self::assertNotNull($request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame('http://example.com/marketplaces/confirm-subscription', (string) $request->getUri());
-        self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
+        self::assertSame('dummy-token', $request->getHeaderLine('X-KBC-ManageApiToken'));
         self::assertSame(json_encode([
             'subscriptionId' => 'subscription-id',
             'organizationId' => 'organization-id',
