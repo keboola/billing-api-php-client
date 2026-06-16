@@ -35,6 +35,8 @@ class InternalClient
 {
     private const DEFAULT_USER_AGENT = 'Billing PHP Client';
     private const DEFAULT_BACKOFF_RETRIES = 10;
+    private const DEFAULT_CONNECT_TIMEOUT = 10;
+    private const DEFAULT_REQUEST_TIMEOUT = 120;
 
     private ApiClient $apiClient;
 
@@ -78,8 +80,8 @@ class InternalClient
             new ApiClientOptions(
                 userAgent: $options['userAgent'],
                 backoffMaxTries: $options['backoffMaxTries'],
-                connectTimeout: (int) ($options['connectTimeout'] ?? ApiClientOptions::DEFAULT_CONNECT_TIMEOUT),
-                requestTimeout: (int) ($options['timeout'] ?? ApiClientOptions::DEFAULT_REQUEST_TIMEOUT),
+                connectTimeout: (int) ($options['connectTimeout'] ?? self::DEFAULT_CONNECT_TIMEOUT),
+                requestTimeout: (int) ($options['timeout'] ?? self::DEFAULT_REQUEST_TIMEOUT),
                 requestHandler: $options['handler'] ?? null,
                 logger: $options['logger'] ?? null,
             ),
