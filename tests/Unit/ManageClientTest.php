@@ -7,7 +7,6 @@ namespace Tests\Keboola\BillingApi\Unit;
 use DateTimeImmutable;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Keboola\BillingApi\InternalClient;
 use Keboola\BillingApi\ManageClient;
@@ -16,14 +15,12 @@ use Keboola\BillingApi\Model\MarketplaceVendor;
 use Keboola\BillingApi\Model\ResolveTokenParameters;
 use Keboola\BillingApi\Model\ResolveTokenResult;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
 
 class ManageClientTest extends TestCase
 {
     public function testRecordJobDuration(): void
     {
-        $requestsMade = [];
-        $responses = [
+        $mock = new MockHandler([
             new Response(200, [], (string) json_encode([
                 'projectId' => 'project-id',
                 'jobId' => 'job-id',
@@ -34,12 +31,10 @@ class ManageClientTest extends TestCase
                 ],
                 'durationSeconds' => 72.7,
             ])),
-        ];
+        ]);
 
-        $handlerStack = HandlerStack::create(new MockHandler($responses));
-        $handlerStack->push(Middleware::history($requestsMade));
         $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
-            'handler' => $handlerStack,
+            'handler' => HandlerStack::create($mock),
         ]);
 
         $client = new ManageClient($internalClient);
@@ -53,10 +48,8 @@ class ManageClientTest extends TestCase
             72.7,
         );
 
-        self::assertCount(1, $requestsMade);
-        $request = $requestsMade[0]['request'];
-
-        self::assertInstanceOf(RequestInterface::class, $request);
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
         self::assertSame('PUT', $request->getMethod());
         self::assertSame('http://example.com/duration/job', (string) $request->getUri());
         self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
@@ -88,15 +81,12 @@ class ManageClientTest extends TestCase
 
     public function testRecordContainerSandboxDuration(): void
     {
-        $requestsMade = [];
-        $responses = [
+        $mock = new MockHandler([
             new Response(200),
-        ];
+        ]);
 
-        $handlerStack = HandlerStack::create(new MockHandler($responses));
-        $handlerStack->push(Middleware::history($requestsMade));
         $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
-            'handler' => $handlerStack,
+            'handler' => HandlerStack::create($mock),
         ]);
 
         $client = new ManageClient($internalClient);
@@ -109,10 +99,8 @@ class ManageClientTest extends TestCase
             14.1,
         );
 
-        self::assertCount(1, $requestsMade);
-        $request = $requestsMade[0]['request'];
-
-        self::assertInstanceOf(RequestInterface::class, $request);
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
         self::assertSame('PUT', $request->getMethod());
         self::assertSame('http://example.com/duration/container-sandbox', (string) $request->getUri());
         self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
@@ -128,35 +116,29 @@ class ManageClientTest extends TestCase
         );
     }
 
-    /** @dataProvider provideResolveMarketplaceTokenTestData */
+    /**
+     * @dataProvider provideResolveMarketplaceTokenTestData
+     */
     public function testResolveMarketplaceToken(
         ResolveTokenParameters $parameters,
         array $expectedRequestData,
         array $responseData,
         ResolveTokenResult $expectedResult,
     ): void {
-        $requestsMade = [];
-        $responses = [
+        $mock = new MockHandler([
             new Response(200, [], (string) json_encode($responseData)),
-        ];
+        ]);
 
-        $handlerStack = HandlerStack::create(new MockHandler($responses));
-        $handlerStack->push(Middleware::history($requestsMade));
         $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
-            'handler' => $handlerStack,
+            'handler' => HandlerStack::create($mock),
         ]);
 
         $client = new ManageClient($internalClient);
 
-        $result = $client->resolveMarketplaceToken(new ResolveTokenParameters(
-            MarketplaceVendor::AZURE,
-            'token-value',
-        ));
+        $result = $client->resolveMarketplaceToken($parameters);
 
-        self::assertCount(1, $requestsMade);
-        $request = $requestsMade[0]['request'];
-
-        self::assertInstanceOf(RequestInterface::class, $request);
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame('http://example.com/marketplaces/resolve-token', (string) $request->getUri());
         self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));
@@ -276,15 +258,12 @@ class ManageClientTest extends TestCase
 
     public function testConfirmMarketplaceSubscription(): void
     {
-        $requestsMade = [];
-        $responses = [
+        $mock = new MockHandler([
             new Response(200),
-        ];
+        ]);
 
-        $handlerStack = HandlerStack::create(new MockHandler($responses));
-        $handlerStack->push(Middleware::history($requestsMade));
         $internalClient = new InternalClient('http://example.com', 'auth-header', 'dummy-token', [
-            'handler' => $handlerStack,
+            'handler' => HandlerStack::create($mock),
         ]);
 
         $client = new ManageClient($internalClient);
@@ -295,10 +274,8 @@ class ManageClientTest extends TestCase
             'project-id',
         ));
 
-        self::assertCount(1, $requestsMade);
-        $request = $requestsMade[0]['request'];
-
-        self::assertInstanceOf(RequestInterface::class, $request);
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame('http://example.com/marketplaces/confirm-subscription', (string) $request->getUri());
         self::assertSame('dummy-token', $request->getHeaderLine('auth-header'));

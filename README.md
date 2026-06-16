@@ -2,21 +2,35 @@
 
 PHP client for the Billing API ([API docs](https://keboolabillingapi.docs.apiary.io/#)).
 
+Built on [`keboola/php-api-client-base`](https://github.com/keboola/php-api-client-base),
+the shared base for Keboola service API clients (HTTP transport, authentication,
+retries, JSON handling and error normalization).
+
 ## Usage
 ```bash
 composer require keboola/billing-api-php-client
 ```
 
-```php
-use Keboola\BillingApi\Client;
+Clients are created through `ClientFactory`, which wires the correct authentication
+header for each client (`X-StorageApi-Token` for the project client,
+`X-KBC-ManageApiToken` for the manage client):
 
-$client = new Client(
-    'http://billing.keboola.com/',
-    'xxx-xxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-);
+```php
+use Keboola\BillingApi\ClientFactory;
+
+$factory = new ClientFactory();
+
+// Project client (authenticated with a Storage API token).
+$client = $factory->createClient('https://billing.keboola.com/', $storageApiToken);
 $credits = $client->getRemainingCredits();
 var_dump($credits);
+
+// Manage client (authenticated with a Manage API token).
+$manageClient = $factory->createManageClient('https://billing.keboola.com/', $manageApiToken);
 ```
+
+`createClient()` and `createManageClient()` accept an optional `$options` array
+(`backoffMaxTries`, `timeout`, `connectTimeout`, `userAgent`, `logger`).
 
 ## Run tests
 - With the above setup, you can run tests:
