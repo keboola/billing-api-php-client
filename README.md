@@ -45,6 +45,23 @@ $manageClient = new ManageClient(
 );
 ```
 
+## Error handling
+Every failure (transport error, non-2xx response, invalid/empty body) throws a
+`Keboola\BillingApi\Exception\BillingException`. It extends the base client's
+`Keboola\ApiClientBase\Exception\ClientException`, so it also exposes the HTTP
+status code and the raw response body when a response was received:
+
+```php
+use Keboola\BillingApi\Exception\BillingException;
+
+try {
+    $credits = $client->getRemainingCredits();
+} catch (BillingException $e) {
+    $e->getStatusCode();   // ?int  — HTTP status, or null for transport/connection failures
+    $e->getResponseBody(); // ?string — raw response body when available
+}
+```
+
 ## Run tests
 - With the above setup, you can run tests:
 

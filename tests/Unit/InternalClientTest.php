@@ -9,6 +9,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Keboola\ApiClientBase\Auth\StorageApiTokenAuthenticator;
+use Keboola\ApiClientBase\Exception\ClientException;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\BillingApi\InternalClient;
 use Monolog\Handler\TestHandler;
@@ -138,6 +139,28 @@ class InternalClientTest extends TestCase
         $this->expectException(BillingException::class);
         $this->expectExceptionMessage('Response is not valid JSON: Syntax error');
         $client->sendRequestWithResponse(new Request('GET', 'credits'));
+    }
+
+    public function testErrorResponseCarriesHttpContext(): void
+    {
+        // The base client throws BillingException directly (it is the configured exception class),
+        // a ClientException subclass that carries the HTTP status code and the raw response body.
+        $mock = new MockHandler([
+            new Response(400, ['Content-Type' => 'application/json'], '{"error":"Insufficient credits"}'),
+        ]);
+
+        $client = $this->getClient(['handler' => HandlerStack::create($mock)]);
+
+        try {
+            $client->sendRequestWithResponse(new Request('GET', 'credits'));
+            self::fail('Must throw exception');
+        } catch (BillingException $e) {
+            self::assertInstanceOf(ClientException::class, $e);
+            self::assertSame('Insufficient credits', $e->getMessage());
+            self::assertSame(400, $e->getCode());
+            self::assertSame(400, $e->getStatusCode());
+            self::assertSame('{"error":"Insufficient credits"}', $e->getResponseBody());
+        }
     }
 
     public function testLogger(): void

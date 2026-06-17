@@ -10,7 +10,6 @@ use GuzzleHttp\Psr7\Request;
 use Keboola\ApiClientBase\ApiClient;
 use Keboola\ApiClientBase\ApiClientOptions;
 use Keboola\ApiClientBase\Auth\RequestAuthenticatorInterface;
-use Keboola\ApiClientBase\Exception\ClientException;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\BillingApi\Model\ArrayResponse;
 use Psr\Http\Message\RequestInterface;
@@ -87,28 +86,23 @@ class InternalClient
                 requestHandler: $options['handler'] ?? null,
                 logger: $options['logger'] ?? null,
             ),
+            // Base client throws BillingException directly on failure (it is a ClientException
+            // subclass), so callers see only BillingException and it carries the HTTP status/body.
+            exceptionClass: BillingException::class,
         );
     }
 
     public function sendRequestWithResponse(Request $request): array
     {
-        try {
-            return $this->apiClient->sendRequestAndMapResponse(
-                $this->withJsonContentType($request),
-                ArrayResponse::class,
-            )->data;
-        } catch (ClientException $e) {
-            throw new BillingException($e->getMessage(), $e->getCode(), $e);
-        }
+        return $this->apiClient->sendRequestAndMapResponse(
+            $this->withJsonContentType($request),
+            ArrayResponse::class,
+        )->data;
     }
 
     public function sendRequestWithoutResponse(Request $request): void
     {
-        try {
-            $this->apiClient->sendRequest($this->withJsonContentType($request));
-        } catch (ClientException $e) {
-            throw new BillingException($e->getMessage(), $e->getCode(), $e);
-        }
+        $this->apiClient->sendRequest($this->withJsonContentType($request));
     }
 
     private function withJsonContentType(Request $request): RequestInterface
