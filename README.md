@@ -27,7 +27,16 @@ var_dump($credits);
 
 // Manage client (authenticated with a Manage API token).
 $manageClient = $factory->createManageClient('https://billing.keboola.com/', $manageApiToken);
+
+// Manage client without a token: authenticates with the projected Kubernetes
+// service-account token (X-Kubernetes-Authorization), read from the standard
+// mount path at request time. Use this when running inside the cluster.
+$manageClient = $factory->createManageClient('https://billing.keboola.com/');
 ```
+
+`createManageClient()`'s token is optional: pass a Manage API token to authenticate
+with it, or omit it (pass `null`/`''`) to fall back to the projected service-account
+token. `createClient()` always requires a Storage API token.
 
 `createClient()` and `createManageClient()` accept an optional `$options` array
 (`backoffMaxTries`, `timeout`, `connectTimeout`, `userAgent`, `logger`).
