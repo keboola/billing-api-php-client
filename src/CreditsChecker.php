@@ -7,6 +7,7 @@ namespace Keboola\BillingApi;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\StorageApi\Client as StorageApiClient;
 use Keboola\StorageApi\Options\IndexOptions;
+use Webmozart\Assert\Assert;
 
 /**
  * @phpstan-import-type Options from InternalClient as ClientOptions
@@ -48,6 +49,8 @@ class CreditsChecker
                 500,
             );
         }
+
+        Assert::stringNotEmpty($token, 'Storage API token must not be empty');
 
         return $this->clientFactory->createClient($url, $token, $options);
     }

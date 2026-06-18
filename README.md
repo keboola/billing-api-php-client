@@ -35,8 +35,9 @@ $manageClient = $factory->createManageClient('https://billing.keboola.com/');
 ```
 
 `createManageClient()`'s token is optional: pass a Manage API token to authenticate
-with it, or omit it (pass `null`/`''`) to fall back to the projected service-account
-token. `createClient()` always requires a Storage API token.
+with it, or omit it (leave it `null`) to fall back to the projected service-account
+token. `createClient()` always requires a Storage API token. A non-null token must
+be a non-empty string — an empty token is rejected (`Webmozart\Assert\InvalidArgumentException`).
 
 `createClient()` and `createManageClient()` accept an optional `$options` array
 (`backoffMaxTries`, `timeout`, `connectTimeout`, `userAgent`, `logger`).

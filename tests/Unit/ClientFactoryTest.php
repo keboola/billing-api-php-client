@@ -10,28 +10,29 @@ use GuzzleHttp\Psr7\Response;
 use Keboola\BillingApi\ClientFactory;
 use Keboola\BillingApi\Exception\BillingException;
 use PHPUnit\Framework\TestCase;
+use Webmozart\Assert\InvalidArgumentException;
 
 class ClientFactoryTest extends TestCase
 {
     public function testCreateClientRejectsEmptyToken(): void
     {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage('token must not be empty');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Storage API token must not be empty');
+        // @phpstan-ignore-next-line we test passing an empty (non-`non-empty-string`) value
         (new ClientFactory())->createClient('https://example.com/', '');
     }
 
-    public static function provideMissingManageToken(): iterable
+    public function testCreateManageClientRejectsEmptyToken(): void
     {
-        yield 'null token' => ['authToken' => null];
-        yield 'empty token' => ['authToken' => ''];
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Manage API token must not be empty');
+        // @phpstan-ignore-next-line we test passing an empty (non-`non-empty-string`) value
+        (new ClientFactory())->createManageClient('https://example.com/', '');
     }
 
-    /**
-     * @dataProvider provideMissingManageToken
-     */
-    public function testCreateManageClientWithoutTokenUsesServiceAccountAuth(?string $authToken): void
+    public function testCreateManageClientWithoutTokenUsesServiceAccountAuth(): void
     {
-        // No manage token -> service-account auth, which reads the projected SA token file at request
+        // A null token -> service-account auth, which reads the projected SA token file at request
         // time. That file is absent in CI, so the read attempt surfaces as a BillingException naming the
         // SA token path -- which proves the service-account authenticator (not manage-token auth) was
         // selected. The SA happy path (real bearer header) can't be unit-tested: the path is hardcoded.
@@ -39,7 +40,7 @@ class ClientFactoryTest extends TestCase
             new Response(200, [], '{}'),
         ]);
 
-        $client = (new ClientFactory())->createManageClient('https://example.com/', $authToken, [
+        $client = (new ClientFactory())->createManageClient('https://example.com/', null, [
             'handler' => HandlerStack::create($mock),
             'backoffMaxTries' => 1, // minimise retry backoff; 0 is coerced to the default
         ]);
