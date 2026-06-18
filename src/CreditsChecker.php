@@ -38,9 +38,10 @@ class CreditsChecker
     }
 
     /**
+     * @param non-empty-string $storageToken
      * @param ClientOptions $options
      */
-    public function getBillingClient(string $token, array $options = []): Client
+    public function getBillingClient(string $storageToken, array $options = []): Client
     {
         $url = $this->getBillingServiceUrl();
         if (!$url) {
@@ -50,9 +51,7 @@ class CreditsChecker
             );
         }
 
-        Assert::stringNotEmpty($token, 'Storage API token must not be empty');
-
-        return $this->clientFactory->createClient($url, $token, $options);
+        return $this->clientFactory->createClient($url, $storageToken, $options);
     }
 
     /**
@@ -69,7 +68,9 @@ class CreditsChecker
             return true; // not a payg project, run everything
         }
 
-        $billingClient = $this->getBillingClient($this->client->getTokenString(), $clientOptions);
+        $storageToken = $this->client->getTokenString();
+        Assert::stringNotEmpty($storageToken, 'Storage API token must not be empty');
+        $billingClient = $this->getBillingClient($storageToken, $clientOptions);
 
         if ($tryTopUp) {
             $remaining = $billingClient->getRemainingCreditsWithOptionalTopUp();
