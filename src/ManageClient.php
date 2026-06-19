@@ -51,7 +51,7 @@ class ManageClient
             'sandboxSize' => $sandboxSize,
             'durationSeconds' => $durationSeconds,
         ], JSON_THROW_ON_ERROR));
-        $this->internalClient->sendRequestWithResponse($request);
+        $this->internalClient->sendRequestWithoutResponse($request);
     }
 
     public function resolveMarketplaceToken(ResolveTokenParameters $parameters): ResolveTokenResult

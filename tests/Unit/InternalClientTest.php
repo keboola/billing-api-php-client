@@ -6,9 +6,10 @@ namespace Tests\Keboola\BillingApi\Unit;
 
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Keboola\ApiClientBase\Auth\StorageApiTokenAuthenticator;
+use Keboola\ApiClientBase\Exception\ClientException;
 use Keboola\BillingApi\Exception\BillingException;
 use Keboola\BillingApi\InternalClient;
 use Monolog\Handler\TestHandler;
@@ -21,8 +22,7 @@ class InternalClientTest extends TestCase
     {
         return new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             $options,
         );
     }
@@ -35,8 +35,7 @@ class InternalClientTest extends TestCase
         );
         new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => 'abc'],
         );
@@ -50,8 +49,7 @@ class InternalClientTest extends TestCase
         );
         new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => -1],
         );
@@ -65,8 +63,7 @@ class InternalClientTest extends TestCase
         );
         new InternalClient(
             'https://example.com/',
-            'authHeader',
-            'authToken',
+            new StorageApiTokenAuthenticator('authToken'),
             // @phpstan-ignore-next-line we test passing invalid value
             ['backoffMaxTries' => 101],
         );
@@ -78,34 +75,7 @@ class InternalClientTest extends TestCase
         $this->expectExceptionMessage(
             'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.',
         );
-        new InternalClient('invalid url', 'authHeader', 'authToken');
-    }
-
-    public function testCreateClientInvalidAuthHeader(): void
-    {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.',
-        );
-        new InternalClient('https://example.com/', '', 'authToken');
-    }
-
-    public function testCreateClientInvalidAuthToken(): void
-    {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "" is invalid: This value should not be blank.',
-        );
-        new InternalClient('https://example.com/', 'authHeader', '');
-    }
-
-    public function testCreateClientMultipleErrors(): void
-    {
-        $this->expectException(BillingException::class);
-        $this->expectExceptionMessage(
-            'Invalid parameters when creating client: Value "invalid url" is invalid: This value is not a valid URL.',
-        );
-        new InternalClient('invalid url', '', '');
+        new InternalClient('invalid url', new StorageApiTokenAuthenticator('authToken'));
     }
 
     public function testClientRequestResponse(): void
@@ -120,13 +90,8 @@ class InternalClientTest extends TestCase
                 }',
             ),
         ]);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
 
-        $client = $this->getClient(['handler' => $stack]);
+        $client = $this->getClient(['handler' => HandlerStack::create($mock)]);
         $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
         self::assertSame([
@@ -134,42 +99,29 @@ class InternalClientTest extends TestCase
             'consumed' => '456.1212121212121212',
         ], $response);
 
-        self::assertCount(1, $requestHistory);
-
-        $request = $requestHistory[0]['request'];
-        self::assertInstanceOf(Request::class, $request);
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
         self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
         self::assertEquals('GET', $request->getMethod());
-        self::assertEquals('authToken', $request->getHeader('authHeader')[0]);
-        self::assertEquals('Billing PHP Client', $request->getHeader('User-Agent')[0]);
-        self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
+        self::assertEquals('authToken', $request->getHeaderLine('X-StorageApi-Token'));
+        self::assertEquals('Billing PHP Client', $request->getHeaderLine('User-Agent'));
+        self::assertEquals('application/json', $request->getHeaderLine('Content-type'));
     }
 
-    public function testClientRequestEmptyResponse(): void
+    public function testClientRequestEmptyResponseThrows(): void
     {
+        // The shared base client decodes every response body as JSON. An empty body is no
+        // longer silently coerced to []; it surfaces as a BillingException. Endpoints that
+        // legitimately return no body are sent via sendRequestWithoutResponse().
         $mock = new MockHandler([
             new Response(200),
         ]);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
 
-        $client = $this->getClient(['handler' => $stack]);
-        $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
+        $client = $this->getClient(['handler' => HandlerStack::create($mock)]);
 
-        self::assertSame([], $response);
-
-        self::assertCount(1, $requestHistory);
-
-        $request = $requestHistory[0]['request'];
-        self::assertInstanceOf(Request::class, $request);
-        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
-        self::assertEquals('GET', $request->getMethod());
-        self::assertEquals('authToken', $request->getHeader('authHeader')[0]);
-        self::assertEquals('Billing PHP Client', $request->getHeader('User-Agent')[0]);
-        self::assertEquals('application/json', $request->getHeader('Content-type')[0]);
+        $this->expectException(BillingException::class);
+        $this->expectExceptionMessage('Response is not valid JSON');
+        $client->sendRequestWithResponse(new Request('GET', 'credits'));
     }
 
     public function testInvalidResponse(): void
@@ -181,17 +133,34 @@ class InternalClientTest extends TestCase
                 'invalid json',
             ),
         ]);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
 
-        $client = $this->getClient(['handler' => $stack]);
+        $client = $this->getClient(['handler' => HandlerStack::create($mock)]);
 
         $this->expectException(BillingException::class);
-        $this->expectExceptionMessage('Unable to parse response body into JSON: Syntax error');
+        $this->expectExceptionMessage('Response is not valid JSON: Syntax error');
         $client->sendRequestWithResponse(new Request('GET', 'credits'));
+    }
+
+    public function testErrorResponseCarriesHttpContext(): void
+    {
+        // The base client throws BillingException directly (it is the configured exception class),
+        // a ClientException subclass that carries the HTTP status code and the raw response body.
+        $mock = new MockHandler([
+            new Response(400, ['Content-Type' => 'application/json'], '{"error":"Insufficient credits"}'),
+        ]);
+
+        $client = $this->getClient(['handler' => HandlerStack::create($mock)]);
+
+        try {
+            $client->sendRequestWithResponse(new Request('GET', 'credits'));
+            self::fail('Must throw exception');
+        } catch (BillingException $e) {
+            self::assertInstanceOf(ClientException::class, $e);
+            self::assertSame('Insufficient credits', $e->getMessage());
+            self::assertSame(400, $e->getCode());
+            self::assertSame(400, $e->getStatusCode());
+            self::assertSame('{"error":"Insufficient credits"}', $e->getResponseBody());
+        }
     }
 
     public function testLogger(): void
@@ -206,38 +175,28 @@ class InternalClientTest extends TestCase
                 }',
             ),
         ]);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
 
         $logsHandler = new TestHandler();
         $logger = new Logger('test', [$logsHandler]);
 
-        $client = $this->getClient(['handler' => $stack, 'logger' => $logger, 'userAgent' => 'test agent']);
+        $client = $this->getClient([
+            'handler' => HandlerStack::create($mock),
+            'logger' => $logger,
+            'userAgent' => 'test agent',
+        ]);
         $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
-        $request = $requestHistory[0]['request'];
-        self::assertInstanceOf(Request::class, $request);
-        self::assertEquals('test agent', $request->getHeader('User-Agent')[0]);
-        self::assertTrue($logsHandler->hasInfoThatContains('"GET  /1.1" 200 '));
-        self::assertTrue($logsHandler->hasInfoThatContains('test agent'));
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
+        self::assertEquals('test agent', $request->getHeaderLine('User-Agent'));
+        self::assertTrue($logsHandler->hasInfoThatContains('GET https://example.com/credits : 200'));
     }
 
     public function testRetrySuccess(): void
     {
         $mock = new MockHandler([
-            new Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                '{"message" => "Out of order"}',
-            ),
-            new Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                'Out of order',
-            ),
+            new Response(500, ['Content-Type' => 'application/json'], 'Out of order'),
+            new Response(500, ['Content-Type' => 'application/json'], 'Out of order'),
             new Response(
                 200,
                 ['Content-Type' => 'application/json'],
@@ -247,12 +206,8 @@ class InternalClientTest extends TestCase
                 }',
             ),
         ]);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-        $client = $this->getClient(['handler' => $stack]);
+
+        $client = $this->getClient(['handler' => HandlerStack::create($mock)]);
         $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
 
         self::assertSame([
@@ -260,13 +215,10 @@ class InternalClientTest extends TestCase
             'consumed' => '456',
         ], $response);
 
-        self::assertCount(3, $requestHistory);
-        $request = $requestHistory[0]['request'];
-        self::assertInstanceOf(Request::class, $request);
-        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
-        $request = $requestHistory[1]['request'];
-        self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
-        $request = $requestHistory[2]['request'];
+        // all three queued responses consumed => two retries happened
+        self::assertSame(0, $mock->count());
+        $request = $mock->getLastRequest();
+        self::assertNotNull($request);
         self::assertEquals('https://example.com/credits', $request->getUri()->__toString());
     }
 
@@ -274,77 +226,63 @@ class InternalClientTest extends TestCase
     {
         $responses = [];
         for ($i = 0; $i < 30; $i++) {
-            $responses[] = new Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                '{"message" => "Out of order"}',
-            );
+            $responses[] = new Response(500, ['Content-Type' => 'application/json'], 'Out of order');
         }
         $mock = new MockHandler($responses);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-        $client = $this->getClient(['handler' => $stack, 'backoffMaxTries' => 1]);
+        $client = $this->getClient(['handler' => HandlerStack::create($mock), 'backoffMaxTries' => 1]);
         try {
             $client->sendRequestWithResponse(new Request('GET', 'credits'));
             self::fail('Must throw exception');
         } catch (BillingException $e) {
             self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
-        self::assertCount(2, $requestHistory);
+        // initial attempt + one retry => 2 of 30 responses consumed
+        self::assertSame(28, $mock->count());
     }
 
     public function testRetryFailureReducedBackoff(): void
     {
         $responses = [];
         for ($i = 0; $i < 30; $i++) {
-            $responses[] = new Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                '{"message" => "Out of order"}',
-            );
+            $responses[] = new Response(500, ['Content-Type' => 'application/json'], 'Out of order');
         }
         $mock = new MockHandler($responses);
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-        $client = $this->getClient(['handler' => $stack, 'backoffMaxTries' => 3]);
+        $client = $this->getClient(['handler' => HandlerStack::create($mock), 'backoffMaxTries' => 3]);
         try {
             $client->sendRequestWithResponse(new Request('GET', 'credits'));
             self::fail('Must throw exception');
         } catch (BillingException $e) {
             self::assertStringContainsString('500 Internal Server Error', $e->getMessage());
         }
-        self::assertCount(4, $requestHistory);
+        // initial attempt + three retries => 4 of 30 responses consumed
+        self::assertSame(26, $mock->count());
     }
 
     public static function provideClientTimeoutOptions(): iterable
     {
         yield 'defaults' => [
             'options' => [],
-            'expectedTimeout' => 120.0,
-            'expectedConnectTimeout' => 10.0,
+            'expectedTimeout' => 120,
+            'expectedConnectTimeout' => 10,
         ];
 
         yield 'custom timeouts' => [
             'options' => [
-                'timeout' => 100.5,
-                'connectTimeout' => 50.0,
+                'timeout' => 100,
+                'connectTimeout' => 50,
             ],
-            'expectedTimeout' => 100.5,
-            'expectedConnectTimeout' => 50.0,
+            'expectedTimeout' => 100,
+            'expectedConnectTimeout' => 50,
         ];
     }
 
-    /** @dataProvider provideClientTimeoutOptions */
+    /**
+     * @dataProvider provideClientTimeoutOptions
+     */
     public function testTimeoutConfiguration(
         array $options,
-        float $expectedTimeout,
-        float $expectedConnectTimeout,
+        int $expectedTimeout,
+        int $expectedConnectTimeout,
     ): void {
         $mock = new MockHandler([
             new Response(
@@ -357,14 +295,8 @@ class InternalClientTest extends TestCase
             ),
         ]);
 
-        // Add the history middleware to the handler stack.
-        $requestHistory = [];
-        $history = Middleware::history($requestHistory);
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
         $client = $this->getClient([
-            'handler' => $stack,
+            'handler' => HandlerStack::create($mock),
             ...$options,
         ]);
         $response = $client->sendRequestWithResponse(new Request('GET', 'credits'));
@@ -374,10 +306,8 @@ class InternalClientTest extends TestCase
             'consumed' => '456.1212121212121212',
         ], $response);
 
-        self::assertCount(1, $requestHistory);
-
-        $options = $requestHistory[0]['options'];
-        self::assertSame($expectedTimeout, $options['timeout'] ?? null);
-        self::assertSame($expectedConnectTimeout, $options['connect_timeout'] ?? null);
+        $lastOptions = $mock->getLastOptions();
+        self::assertSame($expectedTimeout, $lastOptions['timeout'] ?? null);
+        self::assertSame($expectedConnectTimeout, $lastOptions['connect_timeout'] ?? null);
     }
 }
